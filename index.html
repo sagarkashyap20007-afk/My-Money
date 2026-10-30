@@ -237,7 +237,7 @@ function svg(lb,ss,ty){
  [0,.25,.5,.75,1].forEach(function(f){var v=lo+(hi-lo)*f,y=Y(v);o+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" style="stroke:var(--line)"/><text x="'+(L-4)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" style="fill:var(--mute)">'+sh(v)+'</text>'});
  var st=Math.ceil(n/6);lb.forEach(function(l,i){if(i%st==0){var x=ty=="bar"?L+iw*(i+.5)/n:X(i);o+='<text x="'+x+'" y="'+(H-6)+'" text-anchor="middle" font-size="10" style="fill:var(--mute)">'+l+'</text>'}});
  ss.forEach(function(s,k){
-  if(ty=="bar"){var bw=iw/n/(ss.length+.5);s.v.forEach(function(v,i){var x=L+iw*i/n+(iw/n-ss.length*bw)/2+k*bw,y=Y(v),y0=Y(0);o+='<rect x="'+x+'" y="'+Math.min(y,y0)+'" width="'+bw*.9+'" height="'+Math.max(1,Math.abs(y0-y))+'" rx="2" style="fill:'+s.c+'"/>'})}
+  if(ty=="bar"){var bw=iw/n/(ss.length+.5);s.v.forEach(function(v,i){var x=L+iw*i/n+(iw/n-ss.length*bw)/2+k*bw,y=Y(v),y0=Y(0);o+='<rect x="'+x+'" y="'+Math.min(y,y0)+'" width="'+bw*.9+'" height="'+Math.max(1,Math.abs(y0-y))+'" rx="2" style="fill:'+(s.pn&&v<0?"var(--debt)":s.c)+'"/>'})}
   else{var pts=s.v.map(function(v,i){return X(i)+","+Y(v)}).join(" ");
    if(ty!="bar")o+='<polygon points="'+X(0)+","+(T+ih)+" "+pts+" "+X(n-1)+","+(T+ih)+'" style="fill:url(#g'+k+')"/>';
    o+='<polyline points="'+pts+'" fill="none" stroke-width="2.5" stroke-linejoin="round" filter="url(#gl)" style="stroke:'+s.c+'"/>';
@@ -312,7 +312,7 @@ function catSave(t,i){var c=D.cat[t][+i],n=$("en").value.trim(),old=c.n;if(!n)re
  c.ic=$("ei").value.trim();if(t=="e")c.l=$("el").checked?1:0;
  if(n!=old){c.n=n;D.rec.forEach(function(r){if(r.cat==old&&r.t==t)r.cat=n});if(D.last&&D.last[t]==old)D.last[t]=n}
  save();shut();render()}
-function kpis(a,b){var i=0,e=0,l=0;D.rec.forEach(function(r){if(r.date>=a&&r.date<=b){if(r.t=="i")i+=r.amt;else if(r.t=="e"){e+=r.amt;if(isL(r.cat))l+=r.amt}}});return'<div class="sum"><div class="tap" data-t="i" onclick="anBD(this.dataset.t)">Income ›<b class="pos">'+inr(i)+'</b></div><div class="tap" data-t="e" onclick="anBD(this.dataset.t)">Expense ›<b class="neg">'+inr(e)+'</b></div><div>Saved<b class="'+(i-e<0?"neg":"pos")+'">'+inr(i-e)+'</b></div></div>'+(l?'<div class="row" style="margin:-4px 0 8px">★ Leisure '+inr(l)+" ("+(e?Math.round(l/e*100):0)+"% of spending)</div>":"")}
+function kpis(a,b){var i=0,e=0,l=0;D.rec.forEach(function(r){if(r.date>=a&&r.date<=b){if(r.t=="i")i+=r.amt;else if(r.t=="e"){e+=r.amt;if(isL(r.cat))l+=r.amt}}});return'<div class="sum"><div class="tap" data-t="i" onclick="anBD(this.dataset.t)">Income ›<b class="pos">'+inr(i)+'</b></div><div class="tap" data-t="e" onclick="anBD(this.dataset.t)">Expense ›<b class="neg">'+inr(e)+'</b></div><div>Saved<b class="'+(i-e<0?"neg":"pos")+'">'+inr(i-e)+'</b></div></div>'+'<div class="row" style="margin:-4px 0 4px">Savings rate <b class="'+(i-e<0?"neg":"pos")+'">'+(i?Math.round((i-e)/i*100):0)+'%</b></div><div class="row" style="margin:0 0 8px">★ Leisure '+inr(l)+" ("+(e?Math.round(l/e*100):0)+"% of total spending)</div>"}
 var BD={t:"i",s:"amt",g:"cat",c:"",r:null};
 function openBD(t){BD={t:t,s:"amt",g:"cat",c:"",r:null};go("d")}
 function anBD(t){BD={t:t,s:"amt",g:"cat",c:"",r:AR};go("d")}
@@ -362,31 +362,45 @@ function rchips(){var r=[["1D","1D"],["3D","3D"],["1W","1W"],["1M","1M"],["3M","
  return '<div class="rg">'+r.map(function(x){return'<button class="'+(V.r==x[0]?"on":"")+'" data-r="'+x[0]+'" onclick="sr(this.dataset.r)">'+x[1]+'</button>'}).join("")+'</div>'+(V.r=="C"?'<div class="g"><div><label>From</label><input type="date" value="'+(V.f||"")+'" data-k="f" onchange="sd(this)"></div><div><label>To</label><input type="date" value="'+(V.t||"")+'" data-k="t" onchange="sd(this)"></div></div>':"")}
 function chips(k,items){return'<div class="chips">'+items.map(function(i){return'<button class="'+(V[k]==i[0]?"on":"")+'" onclick="sv(\''+k+'\',\''+i[0]+'\')">'+i[1]+"</button>"}).join("")+"</div>"}
 function sv(k,v){V[k]=v;render()}
+var DP=["#22D3EE","#34D399","#FBBF24","#F87171","#A78BFA","#FB923C","#60A5FA","#F472B6"];
+function donut(ks,m,t){var a=0,g=ks.map(function(k,i){var p=m[k]/t*100,s0=a;a+=p;return DP[i%8]+" "+s0+"% "+a+"%"}).join(",");return'<div style="display:flex;justify-content:center;margin:6px 0"><div style="width:170px;height:170px;border-radius:50%;background:conic-gradient('+g+');display:flex;align-items:center;justify-content:center"><div style="width:104px;height:104px;border-radius:50%;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px"><span style="color:var(--mute)">Spent</span><b>'+sh(t)+'</b></div></div></div>'}
+function catTop(a,b){var m={},t=0;D.rec.forEach(function(r){if(r.t=="e"&&r.date>=a&&r.date<=b){m[r.cat]=(m[r.cat]||0)+r.amt;t+=r.amt}});var k=Object.keys(m).sort(function(x,y){return m[y]-m[x]});return k.length?" Top category: "+k[0]+" ("+inr(m[k[0]])+"); average per category "+inr(t/k.length)+".":""}
+function stRow(a,b){return'<div class="row" style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)"><span>'+a+'</span><b>'+b+'</b></div>'}
 function vAn(){
  var B=buckets2(),lb=B.map(function(b){return b.l}),gn=B.gn,S0=B[0].s.slice(0,10),E0=B[B.length-1].e.slice(0,10);AR=[S0,E0];
- var h=rchips()+kpis(S0,E0)+chips("v",[["nw","Net worth"],["ie","Income vs expense"],["cat","Category trend"],["split","Where money goes"],["hist","Spend sizes"]]);
- if(V.v!="split"&&V.v!="hist")h+=chips("ty",[["line","Line"],["bar","Bar"]]);
- h+='<div class="row" style="margin:2px 0 8px">'+{nw:"Your net worth (accounts minus loans) and what you owe, over time.",ie:"Money in versus money out for each period.",cat:"One category, or all income or expenses, over time. Pick one below.",split:"Tap a category to see its transactions.",hist:"How many of your expenses fall in each size range."}[V.v]+"</div>";
+ var h=rchips()+kpis(S0,E0)+chips("v",[["nw","Net worth"],["ie","Income vs expense"],["cat","Category trend"],["split","Where money goes"],["hist","Spend sizes"],["sav","Savings"],["beh","Behaviour"]]);
+ if(V.v!="split"&&V.v!="hist"&&V.v!="beh")h+=chips("ty",[["line","Line"],["bar","Bar"]].concat(V.v=="ie"?[["area","Area + surplus"]]:[]));if(V.v=="split")h+=chips("sd",[["bars","Bars"],["donut","Donut"]]);
+ h+='<div class="row" style="margin:2px 0 8px">'+{nw:"Your net worth (accounts minus loans) and what you owe, over time.",ie:"Money in versus money out for each period.",cat:"One category, or all income or expenses, over time. Pick one below.",split:"Tap a category to see its transactions.",hist:"How many of your expenses fall in each size range.",sav:"Income minus expense for each period, plus your running total.",beh:"Your spending habits in the selected range."}[V.v]+"</div>";
  if(V.v=="cat")h+='<select onchange="sv(\'cat\',this.value)"><option value="__e"'+(V.cat=="__e"?" selected":"")+'>All expenses</option><option value="__i"'+(V.cat=="__i"?" selected":"")+'>All income</option>'+D.cat.e.concat(D.cat.i).map(function(c){return'<option'+(V.cat==c.n?" selected":"")+'>'+esc(c.n)+"</option>"}).join("")+"</select>";
  if(!D.rec.length&&!D.loans.length)return h+'<div class="empty">Add records, accounts and loans to see your charts.</div>';
  var c="",ins="";
  if(V.v=="nw"){
-  var nv=B.map(function(b){return nwAt(b.e)-liAt(b.e)}),lv=B.map(function(b){return liAt(b.e)});
-  c=svg(lb,[{n:"Net worth",c:"var(--acc)",v:nv},{n:"Liabilities",c:"var(--debt)",v:lv}],V.ty);
-  c+='<div class="leg"><span><i style="background:var(--acc)"></i>Net worth</span><span><i style="background:var(--debt)"></i>Liabilities</span></div>';
-  ins="Over these "+B.length+" "+gn+"s your net worth changed by "+inr(nv[nv.length-1]-nv[0])+" and liabilities moved by "+inr(lv[lv.length-1]-lv[0])+"."}
- else if(V.v=="ie"){var iv=B.map(function(b){return sumR(function(r){return r.t=="i"},b.s,b.e)}),xv=B.map(function(b){return sumR(function(r){return r.t=="e"},b.s,b.e)}),ti2=iv.reduce(function(a,b){return a+b},0),te2=xv.reduce(function(a,b){return a+b},0);c=svg(lb,[{n:"Income",c:"var(--good)",v:iv},{n:"Expense",c:"var(--debt)",v:xv}],V.ty)+'<div class="leg"><span><i style="background:var(--good)"></i>Income</span><span><i style="background:var(--debt)"></i>Expense</span></div>';ins="In this period you earned "+inr(ti2)+" and spent "+inr(te2)+(ti2>=te2?", saving ":", overspending by ")+inr(Math.abs(ti2-te2))+"."}
+  var av=B.map(function(b){return nwAt(b.e)}),nv=B.map(function(b){return nwAt(b.e)-liAt(b.e)}),lv=B.map(function(b){return liAt(b.e)});
+  c=svg(lb,[{n:"Net worth",c:"var(--acc)",v:nv,pn:1},{n:"Assets",c:"var(--good)",v:av},{n:"Liabilities",c:"var(--debt)",v:lv}],V.ty);
+  c+='<div class="leg"><span><i style="background:var(--acc)"></i>Net worth</span><span><i style="background:var(--good)"></i>Assets</span><span><i style="background:var(--debt)"></i>Liabilities</span></div>';
+  ins="Now: assets "+inr(av[av.length-1])+", liabilities "+inr(lv[lv.length-1])+", net worth "+inr(nv[nv.length-1])+". Over these "+B.length+" "+gn+"s your net worth changed by "+inr(nv[nv.length-1]-nv[0])+" and liabilities moved by "+inr(lv[lv.length-1]-lv[0])+"."}
+ else if(V.v=="ie"){var iv=B.map(function(b){return sumR(function(r){return r.t=="i"},b.s,b.e)}),xv=B.map(function(b){return sumR(function(r){return r.t=="e"},b.s,b.e)}),ti2=iv.reduce(function(a,b){return a+b},0),te2=xv.reduce(function(a,b){return a+b},0);c=svg(lb,[{n:"Income",c:"var(--good)",v:iv},{n:"Expense",c:"var(--debt)",v:xv}].concat(V.ty=="area"?[{n:"Surplus",c:"var(--acc)",pn:1,v:iv.map(function(x,i){return r2(x-xv[i])})}]:[]),V.ty)+'<div class="leg"><span><i style="background:var(--good)"></i>Income</span><span><i style="background:var(--debt)"></i>Expense</span>'+(V.ty=="area"?'<span><i style="background:var(--acc)"></i>Surplus</span>':"")+'</div>';ins="In this period you earned "+inr(ti2)+" and spent "+inr(te2)+(ti2>=te2?", saving ":", overspending by ")+inr(Math.abs(ti2-te2))+"."}
  else if(V.v=="cat"){
   var f=V.cat=="__e"?function(r){return r.t=="e"}:V.cat=="__i"?function(r){return r.t=="i"}:function(r){return r.t!="t"&&r.cat==V.cat},col=V.cat=="__i"?"var(--good)":"var(--int)";
   var cv=B.map(function(b){return sumR(f,b.s,b.e)}),tot=cv.reduce(function(a,b){return a+b},0),pk=cv.indexOf(Math.max.apply(null,cv));
   c=svg(lb,[{n:"Amount",c:col,v:cv}],V.ty);
-  ins="Total "+inr(tot)+", average "+inr(tot/B.length)+" per "+gn+". Highest "+gn+": "+B[pk].l+" ("+inr(cv[pk])+")."}
+  ins="Total "+inr(tot)+", average "+inr(tot/B.length)+" per "+gn+". Highest "+gn+": "+B[pk].l+" ("+inr(cv[pk])+")."+catTop(S0,E0)}
+ else if(V.v=="sav"){var sv=B.map(function(b){return r2(sumR(function(r){return r.t=="i"},b.s,b.e)-sumR(function(r){return r.t=="e"},b.s,b.e))}),cu=[],q=0,pi=0,ti3=0;
+  B.forEach(function(b){ti3+=sumR(function(r){return r.t=="i"},b.s,b.e)});sv.forEach(function(x,i){q+=x;cu.push(r2(q));if(x>sv[pi])pi=i});
+  c=svg(lb,[{n:"Saved",c:"var(--good)",pn:1,v:sv},{n:"Total saved",c:"var(--acc)",pn:1,v:cu}],V.ty)+'<div class="leg"><span><i style="background:var(--good)"></i>Saved (red = overspent)</span><span><i style="background:var(--acc)"></i>Total saved</span></div>';
+  ins="Saved "+inr(q)+" ("+(ti3?Math.round(q/ti3*100):0)+"% savings rate), average "+inr(q/B.length)+" per "+gn+". Best "+gn+": "+B[pi].l+" ("+inr(sv[pi])+")."}
+ else if(V.v=="beh"){var ex=D.rec.filter(function(r){return r.t=="e"&&r.date>=S0&&r.date<=E0}),tt=0,dm={},mx2=null,dis=0;
+  if(!ex.length)return h+'<div class="empty">No expenses in this period.</div>';
+  ex.forEach(function(r){tt+=r.amt;dm[r.date]=(dm[r.date]||0)+r.amt;if(!mx2||r.amt>mx2.amt)mx2=r;if(isL(r.cat))dis+=r.amt});
+  var dk=Object.keys(dm).sort(function(a,b){return dm[b]-dm[a]}),dys=Math.max(1,Math.round((new Date(E0+"T12:00")-new Date(S0+"T12:00"))/864e5)+1);
+  c=stRow("Average daily spending",inr(tt/dys))+stRow("Highest spending day",dk[0]+" · "+inr(dm[dk[0]]))+stRow("Average transaction",inr(tt/ex.length))+stRow("Largest expense",inr(mx2.amt)+" · "+esc(mx2.cat))+stRow("Transactions",ex.length)+stRow("Essential",inr(tt-dis)+" ("+Math.round((tt-dis)/tt*100)+"%)")+stRow("Discretionary ★",inr(dis)+" ("+Math.round(dis/tt*100)+"%)");
+  ins="Discretionary = categories marked as leisure (★). Everything else counts as essential."}
  else if(V.v=="split"){
   var m={},tot2=0,lt=0;D.rec.forEach(function(r){if(r.t=="e"&&r.date>=S0&&r.date<=E0){m[r.cat]=(m[r.cat]||0)+r.amt;tot2+=r.amt;if(isL(r.cat))lt+=r.amt}});
   var ks=Object.keys(m).sort(function(a,b){return m[b]-m[a]});
   if(!ks.length)return h+'<div class="empty">No expenses in this period.</div>';
-  c=ks.map(function(k){return'<div class="hb tap" data-c="'+esc(k)+'" onclick="anCat(this.dataset.c)" style="cursor:pointer"><span>'+ico(k)+" "+esc(k)+(isL(k)?" ★":"")+'</span><div class="bar"><i style="background:'+(isL(k)?"var(--int)":"var(--acc)")+';width:'+Math.round(m[k]/m[ks[0]]*100)+'%"></i></div><span>'+inr(m[k])+"</span></div>"}).join("");
-  ins="Leisure (★) is "+inr(lt)+", "+Math.round(lt/tot2*100)+"% of your "+inr(tot2)+" spending since "+S0+". Cutting leisure by a quarter would save "+inr(lt/4)+" in this period. Mark leisure categories in Categories."}
+  c=ks.map(function(k){return'<div class="hb tap" data-c="'+esc(k)+'" onclick="anCat(this.dataset.c)" style="cursor:pointer"><span>'+(V.sd=="donut"?'<i style="display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;background:'+DP[ks.indexOf(k)%8]+'"></i>':"")+ico(k)+" "+esc(k)+(isL(k)?" ★":"")+'</span><div class="bar"><i style="background:'+(isL(k)?"var(--int)":"var(--acc)")+';width:'+Math.round(m[k]/m[ks[0]]*100)+'%"></i></div><span>'+inr(m[k])+" · "+Math.round(m[k]/tot2*100)+"%</span></div>"}).join("");
+  if(V.sd=="donut")c=donut(ks,m,tot2)+c;ins="Leisure (★) is "+inr(lt)+", "+Math.round(lt/tot2*100)+"% of your "+inr(tot2)+" spending since "+S0+". Cutting leisure by a quarter would save "+inr(lt/4)+" in this period. Mark leisure categories in Categories."}
  else{
   var am=[];D.rec.forEach(function(r){if(r.t=="e"&&r.date>=S0&&r.date<=E0)am.push(r.amt)});
   if(!am.length)return h+'<div class="empty">No expenses in this period.</div>';
