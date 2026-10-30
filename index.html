@@ -63,6 +63,14 @@ nav button{flex:1;border:0;border-radius:24px;background:none;padding:9px 2px 8p
 .hb{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px}.hb>span:first-child{width:120px}.hb>div{flex:1}.hb>span:last-child{width:70px;text-align:right}
 .ins{margin-top:10px;font-size:14px;padding:10px;border-radius:10px;background:var(--chip)}
 .ci{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.atabs{display:flex;gap:8px;overflow-x:auto;white-space:nowrap;padding:2px 0 10px;scrollbar-width:none}.atabs::-webkit-scrollbar{display:none}
+.atabs button{flex:0 0 auto;border-radius:999px;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:13px}
+.atabs button.on{background:var(--acc);color:#04222A;border-color:var(--acc);font-weight:700}
+.ag{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}.ag3{grid-template-columns:repeat(3,1fr)}.ag3 .at b{font-size:14px}
+.at{background:linear-gradient(145deg,var(--card),transparent);border:1px solid var(--line);border-radius:16px;padding:11px 12px;min-width:0}
+.at small{display:block;color:var(--mute);font-size:11px}.at b{display:block;font-size:18px;margin:3px 0;overflow-wrap:anywhere}.at.w{grid-column:1/-1}
+.at.lz{border-color:#FBBF24;background:linear-gradient(135deg,rgba(251,191,36,.16),transparent)}
+@media(min-width:700px){.ag{grid-template-columns:repeat(4,1fr)}.ag3{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
@@ -73,7 +81,7 @@ nav button{flex:1;border:0;border-radius:24px;background:none;padding:9px 2px 8p
 <div id="sh"><div id="shb"></div></div><div id="fs"></div>
 <div id="dw" onclick="dc()"><div onclick="event.stopPropagation()"><div class="t">Command Center</div><button onclick="go('z')">Analysis</button><button onclick="go('b')">Balance sheet</button><button onclick="go('c')">Categories</button><button onclick="go('x')">Export &amp; backup</button><button onclick="selStart()">Delete selected</button><button onclick="delAll()" style="color:var(--debt)">Delete all</button><button id="thb" onclick="theme()"></button></div></div>
 <script>
-var D={acc:[],rec:[],loans:[]},sel=null,cy=0,ha=0,sm=0,pk={},VIDS=[],SH=190,FS=0,LC=null,AR=[],tab="r",open=null,rt="e",V={v:"nw",r:"1M",ty:"line",cat:"__e"},TT={r:"Records",k:"Calendar",h:"Account history",d:"Breakdown",a:"Accounts",l:"Loans",z:"Analysis",b:"Balance sheet",c:"Categories",x:"Export & backup"};
+var D={acc:[],rec:[],loans:[]},sel=null,cy=0,ha=0,sm=0,pk={},VIDS=[],SH=190,FS=0,LC=null,AR=[],tab="r",open=null,rt="e",V={v:"ov",r:"1M",ty:"line",cat:"__e",sd:"donut"},TT={r:"Records",k:"Calendar",h:"Account history",d:"Breakdown",a:"Accounts",l:"Loans",z:"Analysis",b:"Balance sheet",c:"Categories",x:"Export & backup"};
 function p2(n){return n<10?"0"+n:""+n}
 function dstr(d){return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())}
 function today(){return dstr(new Date())}
@@ -366,20 +374,29 @@ var DP=["#22D3EE","#34D399","#FBBF24","#F87171","#A78BFA","#FB923C","#60A5FA","#
 function donut(ks,m,t){var a=0,g=ks.map(function(k,i){var p=m[k]/t*100,s0=a;a+=p;return DP[i%8]+" "+s0+"% "+a+"%"}).join(",");return'<div style="display:flex;justify-content:center;margin:6px 0"><div style="width:170px;height:170px;border-radius:50%;background:conic-gradient('+g+');display:flex;align-items:center;justify-content:center"><div style="width:104px;height:104px;border-radius:50%;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px"><span style="color:var(--mute)">Spent</span><b>'+sh(t)+'</b></div></div></div>'}
 function catTop(a,b){var m={},t=0;D.rec.forEach(function(r){if(r.t=="e"&&r.date>=a&&r.date<=b){m[r.cat]=(m[r.cat]||0)+r.amt;t+=r.amt}});var k=Object.keys(m).sort(function(x,y){return m[y]-m[x]});return k.length?" Top category: "+k[0]+" ("+inr(m[k[0]])+"); average per category "+inr(t/k.length)+".":""}
 function stRow(a,b){return'<div class="row" style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)"><span>'+a+'</span><b>'+b+'</b></div>'}
+function tabs(it){return'<div class="atabs">'+it.map(function(i){return'<button class="'+(V.v==i[0]?"on":"")+'" onclick="sv(\'v\',\''+i[0]+'\')">'+i[1]+"</button>"}).join("")+"</div>"}
+function tot(t,a,b){var s=0;D.rec.forEach(function(r){if(r.t==t&&r.date>=a&&r.date<=b)s+=r.amt});return s}
+function lsum(a,b){var s=0;D.rec.forEach(function(r){if(r.t=="e"&&r.date>=a&&r.date<=b&&isL(r.cat))s+=r.amt});return s}
+function dlt(c,p,up){if(!p)return"";var k=Math.round((c-p)/Math.abs(p)*100);return'<small class="'+((c>=p)==up?"pos":"neg")+'">'+(c>=p?"↑ ":"↓ ")+Math.abs(k)+"% vs previous period</small>"}
+function tile(l,v,s,cl,x){return'<div class="at '+(cl||"")+'"'+(x||"")+'><small>'+l+'</small><b>'+v+'</b>'+(s?(s.charAt(0)=="<"?s:"<small>"+s+"</small>"):"")+"</div>"}
+function ovHtml(a,b){var d=new Date(a+"T12:00"),n=Math.round((new Date(b+"T12:00")-d)/864e5)+1,pe=new Date(d);pe.setDate(pe.getDate()-1);var ps=new Date(pe);ps.setDate(ps.getDate()-n+1);var p0=dstr(ps),p1=dstr(pe),
+ i=tot("i",a,b),e=tot("e",a,b),l=lsum(a,b),pi=tot("i",p0,p1),pex=tot("e",p0,p1),sv=i-e,rate=i?Math.round(sv/i*100):0,prate=pi?Math.round((pi-pex)/pi*100):0,q=[];
+ if(i)q.push("Your expenses are "+Math.round(e/i*100)+"% of your income.");if(l&&e)q.push("Leisure is "+Math.round(l/e*100)+"% of spending. Trimming it is the quickest way to lift your savings rate.");var ct=catTop(a,b);if(ct)q.push(ct.trim());if(!q.length)q.push("Add income and expense records to see insights.");
+ return'<div class="ag">'+tile("Income",'<span class="pos">'+inr(i)+"</span>",dlt(i,pi,true),"",' data-t="i" onclick="anBD(this.dataset.t)" style="cursor:pointer"')+tile("Expenses",'<span class="neg">'+inr(e)+"</span>",dlt(e,pex,false),"",' data-t="e" onclick="anBD(this.dataset.t)" style="cursor:pointer"')+tile("Saved",'<span class="'+(sv<0?"neg":"pos")+'">'+inr(sv)+"</span>",dlt(sv,pi-pex,true))+tile("Savings rate",'<span class="'+(rate<0?"neg":"pos")+'">'+rate+"%</span>",pi?(rate>=prate?"↑":"↓")+" "+Math.abs(rate-prate)+" pts vs previous period":"")+tile("★ Leisure spending",inr(l),"("+(e?Math.round(l/e*100):0)+"% of total spending) · tap for details","lz w",' onclick="sv(\'v\',\'split\')" style="cursor:pointer"')+"</div>"+'<div class="at"><small>Quick insights</small>'+q.map(function(x){return'<div class="row" style="margin-top:6px">'+esc(x)+"</div>"}).join("")+"</div>"}
 function vAn(){
  var B=buckets2(),lb=B.map(function(b){return b.l}),gn=B.gn,S0=B[0].s.slice(0,10),E0=B[B.length-1].e.slice(0,10);AR=[S0,E0];
- var h=rchips()+kpis(S0,E0)+chips("v",[["nw","Net worth"],["ie","Income vs expense"],["cat","Category trend"],["split","Where money goes"],["hist","Spend sizes"],["sav","Savings"],["beh","Behaviour"]]);
- if(V.v!="split"&&V.v!="hist"&&V.v!="beh")h+=chips("ty",[["line","Line"],["bar","Bar"]].concat(V.v=="ie"?[["area","Area + surplus"]]:[]));if(V.v=="split")h+=chips("sd",[["bars","Bars"],["donut","Donut"]]);
- h+='<div class="row" style="margin:2px 0 8px">'+{nw:"Your net worth (accounts minus loans) and what you owe, over time.",ie:"Money in versus money out for each period.",cat:"One category, or all income or expenses, over time. Pick one below.",split:"Tap a category to see its transactions.",hist:"How many of your expenses fall in each size range.",sav:"Income minus expense for each period, plus your running total.",beh:"Your spending habits in the selected range."}[V.v]+"</div>";
+ var h=rchips()+tabs([["ov","Overview"],["nw","Net worth"],["ie","Income vs Expense"],["cat","Category Trend"],["split","Where Money Goes"],["beh","Behaviour"],["sav","Savings"],["hist","Spend sizes"]]);
+ if(V.v!="split"&&V.v!="hist"&&V.v!="beh"&&V.v!="ov")h+=chips("ty",[["line","Line"],["bar","Bar"]].concat(V.v=="ie"?[["area","Area + surplus"]]:[]));if(V.v=="split")h+=chips("sd",[["bars","Bars"],["donut","Donut"]]);
+ h+='<div class="row" style="margin:2px 0 8px">'+{ov:"Your money at a glance for the selected range.",nw:"Your net worth (accounts minus loans) and what you owe, over time.",ie:"Money in versus money out for each period.",cat:"One category, or all income or expenses, over time. Pick one below.",split:"Tap a category to see its transactions.",hist:"How many of your expenses fall in each size range.",sav:"Income minus expense for each period, plus your running total.",beh:"Your spending habits in the selected range."}[V.v]+"</div>";
  if(V.v=="cat")h+='<select onchange="sv(\'cat\',this.value)"><option value="__e"'+(V.cat=="__e"?" selected":"")+'>All expenses</option><option value="__i"'+(V.cat=="__i"?" selected":"")+'>All income</option>'+D.cat.e.concat(D.cat.i).map(function(c){return'<option'+(V.cat==c.n?" selected":"")+'>'+esc(c.n)+"</option>"}).join("")+"</select>";
  if(!D.rec.length&&!D.loans.length)return h+'<div class="empty">Add records, accounts and loans to see your charts.</div>';
- var c="",ins="";
+ var c="",ins="",pre="",xt="";if(V.v=="ov")return h+ovHtml(S0,E0);
  if(V.v=="nw"){
   var av=B.map(function(b){return nwAt(b.e)}),nv=B.map(function(b){return nwAt(b.e)-liAt(b.e)}),lv=B.map(function(b){return liAt(b.e)});
   c=svg(lb,[{n:"Net worth",c:"var(--acc)",v:nv,pn:1},{n:"Assets",c:"var(--good)",v:av},{n:"Liabilities",c:"var(--debt)",v:lv}],V.ty);
   c+='<div class="leg"><span><i style="background:var(--acc)"></i>Net worth</span><span><i style="background:var(--good)"></i>Assets</span><span><i style="background:var(--debt)"></i>Liabilities</span></div>';
-  ins="Now: assets "+inr(av[av.length-1])+", liabilities "+inr(lv[lv.length-1])+", net worth "+inr(nv[nv.length-1])+". Over these "+B.length+" "+gn+"s your net worth changed by "+inr(nv[nv.length-1]-nv[0])+" and liabilities moved by "+inr(lv[lv.length-1]-lv[0])+"."}
- else if(V.v=="ie"){var iv=B.map(function(b){return sumR(function(r){return r.t=="i"},b.s,b.e)}),xv=B.map(function(b){return sumR(function(r){return r.t=="e"},b.s,b.e)}),ti2=iv.reduce(function(a,b){return a+b},0),te2=xv.reduce(function(a,b){return a+b},0);c=svg(lb,[{n:"Income",c:"var(--good)",v:iv},{n:"Expense",c:"var(--debt)",v:xv}].concat(V.ty=="area"?[{n:"Surplus",c:"var(--acc)",pn:1,v:iv.map(function(x,i){return r2(x-xv[i])})}]:[]),V.ty)+'<div class="leg"><span><i style="background:var(--good)"></i>Income</span><span><i style="background:var(--debt)"></i>Expense</span>'+(V.ty=="area"?'<span><i style="background:var(--acc)"></i>Surplus</span>':"")+'</div>';ins="In this period you earned "+inr(ti2)+" and spent "+inr(te2)+(ti2>=te2?", saving ":", overspending by ")+inr(Math.abs(ti2-te2))+"."}
+  pre='<div class="ag ag3">'+tile("Total assets",inr(av[av.length-1]))+tile("Liabilities",inr(lv[lv.length-1]))+tile("Net worth",'<span class="'+(nv[nv.length-1]<0?"neg":"pos")+'">'+inr(nv[nv.length-1])+"</span>")+"</div>";ins="Now: assets "+inr(av[av.length-1])+", liabilities "+inr(lv[lv.length-1])+", net worth "+inr(nv[nv.length-1])+". Over these "+B.length+" "+gn+"s your net worth changed by "+inr(nv[nv.length-1]-nv[0])+" and liabilities moved by "+inr(lv[lv.length-1]-lv[0])+"."}
+ else if(V.v=="ie"){var iv=B.map(function(b){return sumR(function(r){return r.t=="i"},b.s,b.e)}),xv=B.map(function(b){return sumR(function(r){return r.t=="e"},b.s,b.e)}),ti2=iv.reduce(function(a,b){return a+b},0),te2=xv.reduce(function(a,b){return a+b},0);c=svg(lb,[{n:"Income",c:"var(--good)",v:iv},{n:"Expense",c:"var(--debt)",v:xv}].concat(V.ty=="area"?[{n:"Surplus",c:"var(--acc)",pn:1,v:iv.map(function(x,i){return r2(x-xv[i])})}]:[]),V.ty)+'<div class="leg"><span><i style="background:var(--good)"></i>Income</span><span><i style="background:var(--debt)"></i>Expense</span>'+(V.ty=="area"?'<span><i style="background:var(--acc)"></i>Surplus</span>':"")+'</div>';xt='<div class="ag ag3">'+tile("Income",'<span class="pos">'+inr(ti2)+"</span>")+tile("Expenses",'<span class="neg">'+inr(te2)+"</span>")+tile(ti2>=te2?"Surplus":"Deficit",'<span class="'+(ti2>=te2?"pos":"neg")+'">'+inr(Math.abs(ti2-te2))+"</span>")+"</div>";ins="In this period you earned "+inr(ti2)+" and spent "+inr(te2)+(ti2>=te2?", saving ":", overspending by ")+inr(Math.abs(ti2-te2))+"."}
  else if(V.v=="cat"){
   var f=V.cat=="__e"?function(r){return r.t=="e"}:V.cat=="__i"?function(r){return r.t=="i"}:function(r){return r.t!="t"&&r.cat==V.cat},col=V.cat=="__i"?"var(--good)":"var(--int)";
   var cv=B.map(function(b){return sumR(f,b.s,b.e)}),tot=cv.reduce(function(a,b){return a+b},0),pk=cv.indexOf(Math.max.apply(null,cv));
@@ -393,8 +410,8 @@ function vAn(){
   if(!ex.length)return h+'<div class="empty">No expenses in this period.</div>';
   ex.forEach(function(r){tt+=r.amt;dm[r.date]=(dm[r.date]||0)+r.amt;if(!mx2||r.amt>mx2.amt)mx2=r;if(isL(r.cat))dis+=r.amt});
   var dk=Object.keys(dm).sort(function(a,b){return dm[b]-dm[a]}),dys=Math.max(1,Math.round((new Date(E0+"T12:00")-new Date(S0+"T12:00"))/864e5)+1);
-  c=stRow("Average daily spending",inr(tt/dys))+stRow("Highest spending day",dk[0]+" · "+inr(dm[dk[0]]))+stRow("Average transaction",inr(tt/ex.length))+stRow("Largest expense",inr(mx2.amt)+" · "+esc(mx2.cat))+stRow("Transactions",ex.length)+stRow("Essential",inr(tt-dis)+" ("+Math.round((tt-dis)/tt*100)+"%)")+stRow("Discretionary ★",inr(dis)+" ("+Math.round(dis/tt*100)+"%)");
-  ins="Discretionary = categories marked as leisure (★). Everything else counts as essential."}
+  var pe3=Math.round((tt-dis)/tt*100);
+  return h+'<div class="ag">'+tile("Avg daily spending",inr(tt/dys))+tile("Highest spending day",inr(dm[dk[0]]),dk[0])+tile("Avg transaction",inr(tt/ex.length))+tile("Largest expense",inr(mx2.amt),esc(mx2.cat))+tile("Transactions",ex.length)+tile("Essential / ★ Discretionary",pe3+"% / "+(100-pe3)+"%")+'<div class="at w"><small>Spending distribution</small><div style="display:flex;height:12px;border-radius:7px;overflow:hidden;margin:8px 0"><i style="width:'+pe3+'%;background:var(--acc)"></i><i style="flex:1;background:var(--int)"></i></div><small>Essential '+inr(tt-dis)+' · Discretionary ★ '+inr(dis)+'</small></div></div><div class="ins">Discretionary = categories marked as leisure (★). Everything else counts as essential.</div>'}
  else if(V.v=="split"){
   var m={},tot2=0,lt=0;D.rec.forEach(function(r){if(r.t=="e"&&r.date>=S0&&r.date<=E0){m[r.cat]=(m[r.cat]||0)+r.amt;tot2+=r.amt;if(isL(r.cat))lt+=r.amt}});
   var ks=Object.keys(m).sort(function(a,b){return m[b]-m[a]});
@@ -407,7 +424,7 @@ function vAn(){
   var mx=Math.max.apply(null,am),bs=mx/8||1,ct=[0,0,0,0,0,0,0,0],bl=[];am.forEach(function(a){ct[Math.min(7,Math.floor(a/bs))]++});for(var i=0;i<8;i++)bl.push(sh(i*bs));
   c=svg(bl,[{n:"Count",c:"var(--acc)",v:ct}],"bar");
   ins="How many expenses fall in each size range (₹ from left to right). A tall bar on the left means many small spends that add up."}
- return h+'<div class="card" id="cht" style="border-left-color:var(--line);position:relative">'+c+'<div class="tip"></div><button class="fsb" onclick="fsOpen()" aria-label="Full screen">⛶</button></div><div class="ins">'+ins+"</div>"}
+ return h+pre+'<div class="card" id="cht" style="border-left-color:var(--line);position:relative">'+c+'<div class="tip"></div><button class="fsb" onclick="fsOpen()" aria-label="Full screen">⛶</button></div><div class="ins">'+ins+"</div>"+xt}
 function vBal(){
  var as=assets(),ow=owed(),h='<div class="card"><div class="sec" style="margin:0">Assets</div>';
  D.acc.forEach(function(a){h+='<div class="ci"><span>'+esc(a.name)+'</span><b>'+inr(abal(a))+"</b></div>"});
