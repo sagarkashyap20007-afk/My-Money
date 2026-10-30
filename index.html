@@ -63,6 +63,8 @@ nav button{flex:1;border:0;border-radius:24px;background:none;padding:9px 2px 8p
 .hb{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px}.hb>span:first-child{width:120px}.hb>div{flex:1}.hb>span:last-child{width:70px;text-align:right}
 .ins{margin-top:10px;font-size:14px;padding:10px;border-radius:10px;background:var(--chip)}
 .ci{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.qt{font-size:14px;font-style:italic;line-height:1.55}.qa{font-size:12px;color:var(--mute);margin-top:6px;text-align:right}.qh{font-size:13px;color:var(--mute);margin:16px 0 4px;font-weight:500}
+.qd{padding:10px 14px}.qhd{display:flex;align-items:center;gap:10px}.qpv{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:13px;font-style:italic;color:var(--mute)}.qd.o .qpv{font-style:normal;font-weight:500;color:var(--int)}.qch{color:var(--mute);transition:transform .2s;flex:none}.qd .pay{margin-top:8px}.qd .pay button{padding:5px 12px;font-size:13px}
 </style>
 </head>
 <body>
@@ -71,9 +73,9 @@ nav button{flex:1;border:0;border-radius:24px;background:none;padding:9px 2px 8p
 <button class="fab" id="fab" onclick="fab()" aria-label="Add">+</button>
 <nav><button id="n-r" onclick="go('r')"><i class="ni">🧾</i>Records</button><button id="n-a" onclick="go('a')"><i class="ni">👛</i>Accounts</button><button id="n-l" onclick="go('l')"><i class="ni">🏦</i>Loans</button><button id="n-z" onclick="go('z')"><i class="ni">📊</i>Analysis</button></nav>
 <div id="sh"><div id="shb"></div></div><div id="fs"></div>
-<div id="dw" onclick="dc()"><div onclick="event.stopPropagation()"><div class="t">Command Center</div><button onclick="go('z')">Analysis</button><button onclick="go('b')">Balance sheet</button><button onclick="go('c')">Categories</button><button onclick="go('x')">Export &amp; backup</button><button onclick="selStart()">Delete selected</button><button onclick="delAll()" style="color:var(--debt)">Delete all</button><button id="thb" onclick="theme()"></button></div></div>
+<div id="dw" onclick="dc()"><div onclick="event.stopPropagation()"><div class="t">Command Center</div><button onclick="go('z')">Analysis</button><button onclick="go('b')">Balance sheet</button><button onclick="go('c')">Categories</button><button onclick="go('q')">Mindset quotes</button><button onclick="go('x')">Export &amp; backup</button><button onclick="selStart()">Delete selected</button><button onclick="delAll()" style="color:var(--debt)">Delete all</button><button id="thb" onclick="theme()"></button></div></div>
 <script>
-var D={acc:[],rec:[],loans:[]},sel=null,cy=0,ha=0,sm=0,pk={},VIDS=[],SH=190,FS=0,LC=null,AR=[],tab="r",open=null,rt="e",V={v:"nw",r:"1M",ty:"line",cat:"__e"},TT={r:"Records",k:"Calendar",h:"Account history",d:"Breakdown",a:"Accounts",l:"Loans",z:"Analysis",b:"Balance sheet",c:"Categories",x:"Export & backup"};
+var D={acc:[],rec:[],loans:[]},sel=null,cy=0,ha=0,sm=0,pk={},VIDS=[],SH=190,FS=0,LC=null,AR=[],tab="r",open=null,rt="e",V={v:"nw",r:"1M",ty:"line",cat:"__e",ah:"A"},TT={r:"Records",k:"Calendar",h:"Account history",d:"Breakdown",a:"Accounts",l:"Loans",z:"Analysis",b:"Balance sheet",c:"Categories",x:"Export & backup",q:"Mindset quotes"};
 function p2(n){return n<10?"0"+n:""+n}
 function dstr(d){return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())}
 function today(){return dstr(new Date())}
@@ -83,6 +85,21 @@ if(!D.acc.length&&!D.loans.length){try{var o1=JSON.parse(localStorage.getItem("o
 if(!D.cat){D.cat={e:[["Food",0],["Snacks",1],["Cigarette",1],["Transport",0],["Bills",0],["Shopping",1],["Entertainment",1],["Health",0],["Loan EMI",0],["Other",0]].map(function(x){return{n:x[0],l:x[1]}}),i:["Salary","Trading","Other"].map(function(x){return{n:x}})}}
 function save(){try{localStorage.setItem("owe2",JSON.stringify(D))}catch(e){}}
 function $(i){return document.getElementById(i)}
+var TI=-1,QI=0,LT=["Bank loan","Credit card","Borrowed from a person"];
+function gr(c){var p=String(c).split(".");p[0]=p[0].replace(/\B(?=(\d{2})*\d{3}(?!\d))/g,",");return p.join(".")}
+function gf(n){return gr(String(r2(n)))}
+function gv(id){return +String($(id).value).replace(/,/g,"")||0}
+function fmtIn(el){var v=el.value,pos=el.selectionStart==null?v.length:el.selectionStart,k=0,i,j=0,n=0,ng=el.dataset.neg=="1"&&v.replace(/^\s+/,"").charAt(0)=="-";
+ for(i=0;i<pos;i++)if(/[0-9.]/.test(v.charAt(i)))k++;
+ var c=v.replace(/[^0-9.]/g,""),d=c.indexOf(".");if(d>=0)c=c.slice(0,d+1)+c.slice(d+1).replace(/\./g,"");
+ var a=c.split("."),o=(ng?"-":"")+gr(a[0].replace(/^0+(?=\d)/,""))+(a.length>1?"."+a[1]:"");
+ if(o==v)return;el.value=o;
+ while(j<o.length&&n<k){if(/[0-9.]/.test(o.charAt(j)))n++;j++}
+ if(ng&&j==0)j=1;try{el.setSelectionRange(j,j)}catch(e){}}
+document.addEventListener("input",function(e){var t=e.target;if(t&&t.classList&&t.classList.contains("num"))fmtIn(t)});
+function fdt(d){return new Date(d+"T00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"})}
+function sortP(l){l.pays=l.pays||[];l.pays.sort(function(a,b){return a.d<b.d?1:a.d>b.d?-1:(b.rid||0)-(a.rid||0)})}
+D.loans.forEach(sortP);
 function r2(n){return Math.round((+n||0)*100+(n<0?-1e-9:1e-9))/100}
 function inr(n){n=r2(n);return (n<0?"-":"")+"₹"+Math.abs(n).toLocaleString("en-IN",{minimumFractionDigits:2,maximumFractionDigits:2})}
 function sh(v){var a=Math.abs(v),s=a>=1e7?(a/1e7).toFixed(1)+"Cr":a>=1e5?(a/1e5).toFixed(1)+"L":a>=1e3?(a/1e3).toFixed(a>=1e4?0:1)+"k":Math.round(a)+"";return(v<0?"-":"")+s}
@@ -112,17 +129,17 @@ function dl(fn,txt){
  var anchor=function(){try{var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([txt],{type:"application/octet-stream"}));a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){dlBox(fn,txt)},900)}catch(e){dlBox(fn,txt)}};
  var share=function(){try{var f=new File([txt],fn,{type:fn.slice(-5)==".json"?"application/json":"text/csv"});if(navigator.canShare&&navigator.canShare({files:[f]})){navigator.share({files:[f],title:fn}).catch(function(e){if(!e||e.name!="AbortError")anchor()});return}}catch(e){}anchor()};
  if(typeof claude!=="undefined"&&claude.use){claude.use("downloads").then(function(d){if(!d){share();return}d.save({filename:fn,data:txt}).catch(function(e){if(!e||e.code!="declined")alert("This file could not be saved here.")})}).catch(share)}else share()}
-function accForm(){sheet('<h1>New account</h1><label>Name</label><input id="an" placeholder="Cash, Wallet, Savings"><label>Current balance (₹)</label><input id="ab" type="number" step="any" inputmode="decimal" value="0"><div class="pay"><button class="p" onclick="addAcc()">Save account</button><button onclick="shut()">Cancel</button></div>')}
+function accForm(){sheet('<h1>New account</h1><label>Name</label><input id="an" placeholder="Cash, Wallet, Savings"><label>Current balance (₹)</label><input id="ab" class="num" data-neg="1" type="text" inputmode="decimal" autocomplete="off" value="0"><div class="pay"><button class="p" onclick="addAcc()">Save account</button><button onclick="shut()">Cancel</button></div>')}
 function accMenu(id){var a=acc(id);sheet('<h1>'+esc(a.name)+'</h1><div class="pay"><button class="p" onclick="accEdit('+a.id+')">Edit</button></div><div class="pay"><button onclick="shut();delAcc('+a.id+')">Delete</button><button onclick="shut()">Close</button></div>')}
-function accEdit(id){var a=acc(id);sheet('<h1>Edit account</h1><label>Name</label><input id="an" value="'+esc(a.name).replace(/"/g,"&quot;")+'"><label>Current balance (₹)</label><input id="ab" type="number" step="any" inputmode="decimal" value="'+abal(a)+'"><div class="row">Changing the balance adjusts the opening balance. Your records stay as they are.</div><div class="pay"><button class="p" onclick="saveAcc('+a.id+')">Save changes</button><button onclick="shut()">Cancel</button></div>')}
-function saveAcc(id){var a=acc(id),n=$("an").value.trim(),v=$("ab").value;if(!n){alert("Enter an account name.");return}v=r2(+v||0);a.init=r2(a.init+(v-abal(a)));a.name=n;save();shut();render()}
+function accEdit(id){var a=acc(id);sheet('<h1>Edit account</h1><label>Name</label><input id="an" value="'+esc(a.name).replace(/"/g,"&quot;")+'"><label>Current balance (₹)</label><input id="ab" class="num" data-neg="1" type="text" inputmode="decimal" autocomplete="off" value="'+gf(abal(a))+'"><div class="row">Changing the balance adjusts the opening balance. Your records stay as they are.</div><div class="pay"><button class="p" onclick="saveAcc('+a.id+')">Save changes</button><button onclick="shut()">Cancel</button></div>')}
+function saveAcc(id){var a=acc(id),n=$("an").value.trim(),v=$("ab").value;if(!n){alert("Enter an account name.");return}v=r2(gv("ab"));a.init=r2(a.init+(v-abal(a)));a.name=n;save();shut();render()}
 function delAcc(id){var used=D.rec.some(function(r){return r.acc==id||r.to==id});if(used){alert("This account has records. Delete or move those records first.");return}if(confirm("Delete this account?")){D.acc=D.acc.filter(function(x){return x.id!=id});save();render()}}
-function addAcc(){var n=$("an").value.trim();if(!n){alert("Enter an account name.");return}D.acc.push({id:Date.now(),name:n,init:r2(+$("ab").value||0)});save();shut();render()}
+function addAcc(){var n=$("an").value.trim();if(!n){alert("Enter an account name.");return}D.acc.push({id:Date.now(),name:n,init:r2(gv("ab"))});save();shut();render()}
 function recFormOld(eid){var E=eid?D.rec.find(function(x){return x.id==eid}):null;if(E)rt=E.t;
  if(!D.acc.length){alert("Add an account first.");go("a");return}
  sheet('<div class="seg" id="sg"><button onclick="setT(\'e\')">Expense</button><button onclick="setT(\'i\')">Income</button><button onclick="setT(\'t\')">Transfer</button></div><label>Amount (₹)</label><div class="pay" style="margin-top:0"><input id="ra" readonly inputmode="none" value="0" style="font-size:26px;text-align:right" aria-label="Amount"><button data-k="⌫" onclick="kk(this.dataset.k)" aria-label="Delete last digit">⌫</button></div><div id="ex" class="ex"></div>'+kpad()+'<label id="fl">Account</label><select id="rc">'+opts(D.acc)+'</select><div id="tw" style="display:none"><label>To account</label><select id="rd">'+opts(D.acc)+'</select></div><div id="cw"><label>Category</label><select id="rk"></select></div><label>Note</label><input id="rn"><label>Date</label><input id="rx" type="date" value="'+today()+'"><div class="pay"><button class="p" onclick="addRec('+(eid||0)+')">'+(E?"Update":"Save")+' record</button><button onclick="shut()">Cancel</button></div>');setT(rt);if(E){$("ra").value=E.amt;$("rc").value=E.acc;if(E.t=="t")$("rd").value=E.to;else $("rk").value=E.cat;$("rn").value=E.note;$("rx").value=E.date}}
 function setTOld(t){rt=t;var b=$("sg").children;for(var i=0;i<3;i++)b[i].className="eit".charAt(i)==t?"on":"";$("tw").style.display=t=="t"?"block":"none";$("cw").style.display=t=="t"?"none":"block";$("fl").textContent=t=="t"?"From account":"Account";if(t!="t")$("rk").innerHTML=copts(t)}
-function addRec(eid){var a=+ev($("ra").value);if(!(a>0)){alert("Enter an amount.");return}
+function addRec(eid){var a=+ev(rawA());if(!(a>0)){alert("Enter an amount.");return}
  var r={id:eid||Date.now(),t:rt,amt:a,acc:+$("rc").value,to:+$("rd").value,cat:rt=="t"?"Transfer":$("rk").value,note:$("rn").value.trim(),date:$("rx").value||today(),time:$("rm").value||"00:00"};
  if(r.t=="t"&&r.acc==r.to){alert("Pick two different accounts.");return}
  D.last=D.last||{};D.last.acc=r.acc;if(r.t!="t")D.last[r.t]=r.cat;if(eid)D.rec=D.rec.map(function(x){return x.id==eid?r:x});else D.rec.push(r);mo=r.date.slice(0,7);sel=null;save();shut();render()}
@@ -131,16 +148,20 @@ function delRec(id){var r=D.rec.find(function(x){return x.id==id});
  if(r.loan){var l=D.loans.find(function(x){return x.id==r.loan.id});if(l){l.bal=r2(l.bal+r.loan.p);l.pays=l.pays.filter(function(p){return p.rid!=id})}}
  D.rec=D.rec.filter(function(x){return x.id!=id});save();render()}
 function kpad(){return '<div class="kp">'+["+","7","8","9","-","4","5","6","×","1","2","3","÷","0",".","="].map(function(k){return '<button class="'+("+-×÷=".indexOf(k)>=0?"op":"")+'" data-k="'+k+'" onclick="kk(this.dataset.k)">'+k+'</button>'}).join("")+'</div>'}
-function kk(k){var i=$("ra"),v=i.value,op="+-×÷";
- if(k=="="){var r=ev(v);if(pr(v)!=v)$("ex").textContent=pr(v)+" = "+r;i.value=r;return}
- if(k=="⌫"){v=v.slice(0,-1);i.value=v||"0";upd();return}
+function rawA(){var i=$("ra");return i.dataset.raw==null?"0":i.dataset.raw}
+function setA(v){var i=$("ra");v=String(v||"0");i.dataset.raw=v;i.value=fxn(v,0)}
+function hasOp(v){return /[+\-×÷]/.test(v)}
+function fxn(v,sp){var o="",c="",i,ch;for(i=0;i<v.length;i++){ch=v.charAt(i);if("+-×÷".indexOf(ch)>=0){o+=gr(c)+(sp?" "+ch+" ":ch);c=""}else c+=ch}return o+gr(c)}
+function kk(k){var v=rawA(),op="+-×÷";
+ if(k=="="){var r=ev(v);if(hasOp(v))$("ex").textContent=fxn(v,1)+" = "+gr(r);setA(r);return}
+ if(k=="⌫"){v=v.slice(0,-1);setA(v||"0");upd();return}
  var cur=v;for(var j=0;j<op.length;j++)cur=cur.split(op.charAt(j)).pop();
  if(k=="."&&cur.indexOf(".")>=0)return;
  if(op.indexOf(k)>=0&&op.indexOf(v.slice(-1))>=0)v=v.slice(0,-1);
  if(v=="0"&&op.indexOf(k)<0&&k!=".")v="";
- i.value=v+k;upd()}
-function pr(v){var o="";for(var i=0;i<v.length;i++){var c=v.charAt(i);o+="+-×÷".indexOf(c)>=0?" "+c+" ":c}return o}
-function upd(){var v=$("ra").value,p=pr(v);$("ex").textContent=p!=v?p+" = "+ev(v):""}
+ setA(v+k);upd()}
+function pr(v){return fxn(v,1)}
+function upd(){var v=rawA();$("ex").textContent=hasOp(v)?fxn(v,1)+" = "+gr(ev(v)):""}
 function ev(s){while(s&&"+-×÷.".indexOf(s.slice(-1))>=0)s=s.slice(0,-1);var t=[],c="";for(var i=0;i<s.length;i++){var ch=s.charAt(i);if("+-×÷".indexOf(ch)>=0){t.push(+c,ch);c=""}else c+=ch}t.push(+c);var a=[t[0]];for(i=1;i<t.length;i+=2){var o=t[i],n=t[i+1];if(o=="×")a[a.length-1]*=n;else if(o=="÷")a[a.length-1]=n?a[a.length-1]/n:0;else a.push(o,n)}var r=a[0];for(i=1;i<a.length;i+=2)r=a[i]=="+"?r+a[i+1]:r-a[i+1];return r>0&&isFinite(r)?""+Math.round(r*100)/100:"0"}
 function trail(){var y=mo.slice(0,4),m=new Date(mo+"-01T00:00").toLocaleDateString("en-IN",{month:"short"});return '<div class="chips"><button onclick="goToday()">⟲ Today</button><button onclick="openCal()">'+y+'</button><button class="'+(sel?"":"on")+'" onclick="sel=null;render()">'+m+'</button>'+(sel?'<button class="on">'+new Date(sel+"T00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short"})+'</button>':"")+'</div>'}
 function goToday(){sel=null;mo=today().slice(0,7);go("r")}
@@ -162,14 +183,16 @@ function vCal(){
  return h+"</div>"}
 function recMenu(id){var r=D.rec.find(function(x){return x.id==id});sheet('<h1>'+esc(r.cat)+' · '+inr(r.amt)+'</h1>'+(r.loan?'<div class="row">Loan payments cannot be edited. Delete it to undo the payment, then record it again.</div>':'<div class="pay"><button class="p" onclick="recForm('+id+')">Edit</button></div>')+'<div class="pay"><button onclick="shut();delRec('+id+')">Delete</button><button onclick="shut()">Close</button></div>')}
 function loanMenu(id){var l=D.loans.find(function(x){return x.id==id});sheet('<h1>'+esc(l.name)+'</h1><div class="pay"><button class="p" onclick="loanEdit('+id+')">Edit</button></div><div class="pay"><button onclick="shut();delLoan('+id+')">Delete</button><button onclick="shut()">Close</button></div>')}
-function loanEdit(id){var L=D.loans.find(function(x){return x.id==id});loanForm();$("shb").querySelector("h1").textContent="Edit liability";$("n").value=L.name;$("t").value=L.type;$("b").value=Math.round(L.bal*100)/100;$("o").value=L.orig;$("r").value=L.rate;$("e").value=L.emi;$("d").value=L.due;$("shb").querySelector(".p").setAttribute("onclick","addLoan("+id+")")}
+function loanEdit(id){var L=D.loans.find(function(x){return x.id==id});loanForm();$("shb").querySelector("h1").textContent="Edit liability";$("n").value=L.name;
+ if(LT.indexOf(L.type)>=0)$("t").value=L.type;else{$("t").value="Others";$("ot").value=L.type;$("ow").style.display="block"}
+ $("b").value=gf(L.bal);$("o").value=gf(L.orig);$("r").value=gr(String(L.rate));$("e").value=gf(L.emi);$("d").value=L.due;$("shb").querySelector(".p").setAttribute("onclick","addLoan("+id+")")}
 function shift(n){sel=null;var d=new Date(+mo.slice(0,4),+mo.slice(5)-1+n,1);mo=d.getFullYear()+"-"+p2(d.getMonth()+1);render()}
 function vRec(){
  var rs=D.rec.filter(function(r){return sel?r.date==sel:r.date.slice(0,7)==mo}).sort(function(a,b){return b.date<a.date?-1:b.date>a.date?1:(b.time||"")<(a.time||"")?-1:(b.time||"")>(a.time||"")?1:b.id-a.id}),ex=0,inc=0;
  rs.forEach(function(r){if(r.t=="e")ex+=r.amt;if(r.t=="i")inc+=r.amt});
  VIDS=rs.map(function(r){return r.id});var nm=new Date(mo+"-01T00:00").toLocaleDateString("en-IN",{month:"long",year:"numeric"});
  var h='<div class="mn"><button onclick="shift(-1)" aria-label="Previous month">‹</button><button onclick="openCal()" aria-label="Open calendar">'+nm+' ▾</button><button onclick="shift(1)" aria-label="Next month">›</button></div>'+(sm?selBar():trail())+'<div class="sum"><div class="tap" data-t="e" onclick="openBD(this.dataset.t)">Expense ›<b class="neg">'+inr(ex)+'</b></div><div class="tap" data-t="i" onclick="openBD(this.dataset.t)">Income ›<b class="pos">'+inr(inc)+'</b></div><div>Balance<b>'+inr(inc-ex)+'</b></div></div>';
- if(!rs.length)return h+'<div class="empty">No records this month. Tap + to add an expense, income or transfer.</div>';
+ if(!sm)h+=qcard(["s","m"]);if(!rs.length)return h+'<div class="empty">No records this month. Tap + to add an expense, income or transfer.</div>';
  var last="";rs.forEach(function(r){
   if(r.date!=last){last=r.date;h+='<div class="day">'+new Date(r.date+"T00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short",weekday:"long"})+"</div>"}
   var a=acc(r.acc),b=acc(r.to),w=(r.time?r.time+" · ":"")+(a?esc(a.name):"?");if(r.t=="t")w+=" → "+(b?esc(b.name):"?");
@@ -179,47 +202,107 @@ function vRec(){
 function vAcc(){
  var as=assets(),ow=owed();
  var h='<h1>Net worth</h1><div class="big" style="color:'+(as-ow<0?"var(--debt)":"var(--good)")+'">'+inr(as-ow)+'</div><div class="sum"><div>In accounts<b>'+inr(as)+'</b></div><div>Loans owed<b class="neg">'+inr(ow)+'</b></div><div></div></div>';
- if(!D.acc.length)return h+'<div class="empty">No accounts yet. Tap + to add Cash, Wallet or a bank account.</div>';
+ h+=qcard(["m","i"]);if(!D.acc.length)return h+'<div class="empty">No accounts yet. Tap + to add Cash, Wallet or a bank account.</div>';
  D.acc.forEach(function(a){h+='<div class="card" data-a="'+a.id+'" onclick="openAcc(this.dataset.a)" style="cursor:pointer"><div class="top"><div style="display:flex;gap:12px;align-items:center"><div class="ic">'+aico(a.name)+'</div><div><div class="name">'+esc(a.name)+'</div><div class="type">Tap for history</div></div></div><div class="bal">'+inr(abal(a))+'</div><button class="dots" data-a="'+a.id+'" onclick="event.stopPropagation();accMenu(this.dataset.a)" aria-label="Options">⋮</button></div></div>'});
  return h}
 function sim(b,r,e,x){r=r/1200;var m=0,t=0,p=e+x;if(p<=b*r+0.01)return null;while(b>0.5&&m<1200){var i=b*r;t+=i;b-=Math.min(b,p-i);m++}return{m:m,t:t}}
 function dateIn(m){var d=new Date();d.setMonth(d.getMonth()+m);return d.toLocaleDateString("en-IN",{month:"short",year:"numeric"})}
-function loanForm(){sheet('<h1>New liability</h1><label>Name</label><input id="n" placeholder="HDFC personal loan"><label>Type</label><select id="t"><option>Bank loan</option><option>Credit card</option><option>Borrowed from a person</option></select><div class="g"><div><label>Outstanding now (₹)</label><input id="b" type="number" step="any" inputmode="decimal"></div><div><label>Original amount (optional)</label><input id="o" type="number" step="any" inputmode="decimal"></div></div><div class="g"><div><label>Interest (% a year)</label><input id="r" type="number" step="any" inputmode="decimal" value="0"></div><div><label>Monthly EMI (₹)</label><input id="e" type="number" step="any" inputmode="decimal"></div></div><label>EMI due day (1–28)</label><input id="d" type="number" min="1" max="28" value="5"><div class="pay"><button class="p" onclick="addLoan()">Save liability</button><button onclick="shut()">Cancel</button></div>')}
-function addLoan(id){var n=$("n").value.trim(),b=+$("b").value,e=+$("e").value;
+function loanForm(){sheet('<h1>New liability</h1><label>Name</label><input id="n" placeholder="HDFC personal loan"><label>Type</label><select id="t" onchange="otChg()"><option>Bank loan</option><option>Credit card</option><option>Borrowed from a person</option><option>Others</option></select><div id="ow" style="display:none"><label>Type of loan</label><input id="ot" maxlength="40" placeholder="e.g. Gold loan, Education loan"></div><div class="g"><div><label>Outstanding now (₹)</label><input id="b" class="num" type="text" inputmode="decimal" autocomplete="off"></div><div><label>Original amount (optional)</label><input id="o" class="num" type="text" inputmode="decimal" autocomplete="off"></div></div><div class="g"><div><label>Interest (% a year)</label><input id="r" class="num" type="text" inputmode="decimal" autocomplete="off" value="0"></div><div><label>Monthly EMI (₹)</label><input id="e" class="num" type="text" inputmode="decimal" autocomplete="off"></div></div><label>EMI due day (1–28)</label><input id="d" type="number" min="1" max="28" value="5"><div class="pay"><button class="p" onclick="addLoan()">Save liability</button><button onclick="shut()">Cancel</button></div>')}
+function otChg(){var o=$("t").value=="Others";$("ow").style.display=o?"block":"none";if(o)$("ot").focus()}
+function addLoan(id){var n=$("n").value.trim(),b=gv("b"),e=gv("e"),ty=$("t").value;
+ if(ty=="Others"){ty=$("ot").value.trim();if(!ty){alert("Type the kind of loan, for example Gold loan.");$("ot").focus();return}}
  if(!n||!(b>0)||!(e>0)){alert("Enter a name, the outstanding amount and the monthly EMI.");return}
- var o=+$("o").value||b;if(o<b)o=b;
- var nl={name:n,type:$("t").value,orig:o,bal:b,rate:+$("r").value||0,emi:e,due:Math.min(28,Math.max(1,+$("d").value||5))};if(id){Object.assign(D.loans.find(function(x){return x.id==id}),nl)}else{nl.id=Date.now();nl.pays=[];D.loans.push(nl)}save();shut();render()}
+ var o=gv("o")||b;if(o<b)o=b;
+ var nl={name:n,type:ty,orig:o,bal:b,rate:gv("r"),emi:e,due:Math.min(28,Math.max(1,+$("d").value||5))};if(id){Object.assign(D.loans.find(function(x){return x.id==id}),nl)}else{nl.id=Date.now();nl.pays=[];D.loans.push(nl)}save();shut();render()}
 function payLoan(id){
- var l=D.loans.find(function(x){return x.id==id}),a=+$("a"+id).value,ac=+$("c"+id).value;
+ var l=D.loans.find(function(x){return x.id==id}),a=gv("a"+id),ac=+$("c"+id).value,dd=$("dt"+id).value||today();
  if(!D.acc.length){alert("Add an account first, so the payment can come out of it.");return}
  if(!(a>0))return;var mx=l.bal+l.bal*l.rate/1200;if(a>mx)a=mx;
  a=r2(a);var i=r2(Math.min(a,l.bal*l.rate/1200)),pr=r2(a-i),rid=Date.now();
- l.bal=r2(Math.max(0,l.bal-pr));l.pays.unshift({d:today(),a:a,i:i,p:pr,rid:rid});
- D.rec.push({id:rid,t:"e",amt:a,acc:ac,cat:"Loan EMI",note:l.name,date:today(),loan:{id:l.id,p:pr,i:i}});save();render()}
+ l.bal=r2(Math.max(0,l.bal-pr));l.pays.push({d:dd,a:a,i:i,p:pr,rid:rid});sortP(l);
+ D.rec.push({id:rid,t:"e",amt:a,acc:ac,cat:"Loan EMI",note:l.name,date:dd,loan:{id:l.id,p:pr,i:i}});save();render()}
+function payHist(id){var l=D.loans.find(function(x){return x.id==id}),ta=0,ti=0,tp=0,td=today();l.pays.forEach(function(p){ta+=p.a;ti+=p.i;tp+=p.p});
+ var rows=l.pays.map(function(p){var r=D.rec.find(function(x){return x.id==p.rid}),a=r?acc(r.acc):null;return'<tr><td>'+fdt(p.d)+'<div class="type">'+(a?esc(a.name):"")+(p.d>td?(a?" · ":"")+"upcoming":"")+'</div></td><td>'+inr(p.a)+'</td><td>'+inr(p.i)+'</td><td>'+inr(p.p)+'</td><td>'+(r?'<button class="dots" data-r="'+p.rid+'" onclick="shut();delRec(this.dataset.r)" aria-label="Undo this payment">✕</button>':"")+'</td></tr>'}).join("");
+ sheet('<div class="tb"><button onclick="shut()">✕ Close</button></div><h1>'+esc(l.name)+' · EMI history</h1><div class="sum"><div>Total paid<b>'+inr(ta)+'</b></div><div>Interest<b style="color:var(--int)">'+inr(ti)+'</b></div><div>Principal<b class="pos">'+inr(tp)+'</b></div></div><div class="row"><span>'+l.pays.length+" payment"+(l.pays.length==1?"":"s")+'</span><span>Outstanding '+inr(l.bal)+'</span></div>'+(l.pays.length?'<table style="font-size:12px"><tr><th>Date</th><th>Paid</th><th>Interest</th><th>Principal</th><th></th></tr>'+rows+'</table><div class="row">✕ undoes a payment and puts the principal back on the loan.</div>':'<div class="empty">No payments recorded yet.</div>'));$("shb").className="full"}
 function delLoan(id){if(confirm("Delete this liability and its history?")){D.loans=D.loans.filter(function(x){return x.id!=id});save();render()}}
 function tog(id){open=open==id?null:id;render()}
-function calc(id){var l=D.loans.find(function(x){return x.id==id}),x=+$("x"+id).value||0,a=sim(l.bal,l.rate,l.emi,0),b=sim(l.bal,l.rate,l.emi,x),o=$("o"+id);
+function calc(id){var l=D.loans.find(function(x){return x.id==id}),x=gv("x"+id),a=sim(l.bal,l.rate,l.emi,0),b=sim(l.bal,l.rate,l.emi,x),o=$("o"+id);
  if(!a){o.textContent="This EMI does not cover the monthly interest. Increase the EMI.";return}
  o.textContent=x>0&&b?"Done "+(a.m-b.m)+" months sooner ("+dateIn(b.m)+") and "+inr(a.t-b.t)+" less interest.":"No extra payment: debt-free by "+dateIn(a.m)+", with "+inr(a.t)+" interest still to pay."}
 function badge(l){if(l.bal<=0)return '<span class="badge ok">Cleared</span>';
- var t=today();if(l.pays.length&&l.pays[0].d.slice(0,7)==t.slice(0,7))return '<span class="badge ok">Paid this month</span>';
+ var t=today();if(l.pays.some(function(p){return p.d.slice(0,7)==t.slice(0,7)}))return '<span class="badge ok">Paid this month</span>';
  var days=l.due-new Date().getDate();if(days<0)return '<span class="badge due">Overdue by '+(-days)+' days</span>';
  return '<span class="badge'+(days<=3?" due":"")+'">'+(days==0?"Due today":"Due in "+days+" days")+"</span>"}
 function vLoan(){
  var tb=0,to=0,te=0;D.loans.forEach(function(l){tb+=l.bal;to+=l.orig;te+=l.bal>0?l.emi:0});
  var pc=to?Math.round((to-tb)/to*100):0;
  var h='<h1>Total you owe</h1><div class="big" style="color:var(--debt)">'+inr(tb)+'</div><div class="row"><span>'+(D.loans.length?inr(te)+" in EMIs every month":"")+'</span></div><div class="bar" style="margin-top:10px"><i style="background:var(--good);width:'+pc+'%"></i></div><div class="row"><span>'+(D.loans.length?pc+"% repaid":"")+'</span><span>'+(D.loans.length?inr(to-tb)+" of "+inr(to):"")+"</span></div>";
- if(!D.loans.length)return h+'<div class="empty">No liabilities yet. Tap + to add a loan, credit card or money you borrowed.</div>';
+ h+=qcard(["d"]);if(!D.loans.length)return h+'<div class="empty">No liabilities yet. Tap + to add a loan, credit card or money you borrowed.</div>';
  D.loans.forEach(function(l){
   var pd=l.orig?Math.round((l.orig-l.bal)/l.orig*100):0,ti=0,tp=0;l.pays.forEach(function(p){ti+=p.i;tp+=p.p});
   var ni=Math.min(l.emi,l.bal*l.rate/1200),np=Math.max(0,Math.min(l.emi,l.bal+ni)-ni),sp=sim(l.bal,l.rate,l.emi,0),iw=ti+tp?Math.round(ti/(ti+tp)*100):0;
-  h+='<div class="card'+(open==l.id?" open":"")+'"><div class="top" onclick="tog('+l.id+')"><div style="display:flex;gap:12px;align-items:flex-start"><div class="ic">'+lico(l.type)+'</div><div><div class="name">'+esc(l.name)+'</div><div class="type">'+l.type+" · "+l.rate+"% a year · EMI "+inr(l.emi)+"</div>"+badge(l)+'</div></div><div class="bal">'+inr(l.bal)+'</div><button class="dots" onclick="event.stopPropagation();loanMenu('+l.id+')" aria-label="Options">⋮</button></div><div class="bar" style="margin-top:12px"><i style="background:var(--good);width:'+pd+'%"></i></div><div class="row"><span>'+pd+'% repaid</span><span>'+(sp&&l.bal>0?"Debt-free by "+dateIn(sp.m):"")+'</span></div>'
-  +'<div class="det"><label>Pay from account</label><select id="c'+l.id+'">'+opts(D.acc)+'</select><div class="pay"><input id="a'+l.id+'" type="number" step="any" inputmode="decimal" value="'+l.emi+'" aria-label="Payment amount"><button class="p" onclick="payLoan('+l.id+')">Pay EMI</button></div>'
+  h+='<div class="card'+(open==l.id?" open":"")+'"><div class="top" onclick="tog('+l.id+')"><div style="display:flex;gap:12px;align-items:flex-start"><div class="ic">'+lico(l.type)+'</div><div><div class="name">'+esc(l.name)+'</div><div class="type">'+esc(l.type)+" · "+l.rate+"% a year · EMI "+inr(l.emi)+"</div>"+badge(l)+'</div></div><div class="bal">'+inr(l.bal)+'</div><button class="dots" onclick="event.stopPropagation();loanMenu('+l.id+')" aria-label="Options">⋮</button></div><div class="bar" style="margin-top:12px"><i style="background:var(--good);width:'+pd+'%"></i></div><div class="row"><span>'+pd+'% repaid</span><span>'+(sp&&l.bal>0?"Debt-free by "+dateIn(sp.m):"")+'</span></div>'
+  +'<div class="det"><label>Pay from account</label><select id="c'+l.id+'">'+opts(D.acc)+'</select><label>Payment date</label><input id="dt'+l.id+'" type="date" value="'+today()+'"><div class="pay"><input id="a'+l.id+'" class="num" type="text" inputmode="decimal" autocomplete="off" value="'+gf(l.emi)+'" aria-label="Payment amount"><button class="p" onclick="payLoan('+l.id+')">Pay EMI</button></div>'
   +'<div class="sec">Interest vs principal</div><div class="bar" style="margin-top:6px"><i style="background:var(--int);width:'+iw+'%"></i><i style="background:var(--good);width:'+(ti+tp?100-iw:0)+'%"></i></div><div class="row"><span style="color:var(--int)">Interest paid '+inr(ti)+'</span><span style="color:var(--good)">Principal paid '+inr(tp)+'</span></div><div class="row"><span>Next EMI splits into</span><span>'+inr(ni)+" interest + "+inr(np)+" principal</span></div>"
-  +'<div class="sec">Pay extra every month</div><div class="pay"><input id="x'+l.id+'" type="number" step="any" inputmode="decimal" placeholder="Extra ₹ per month" oninput="calc('+l.id+')"></div><div class="row" id="o'+l.id+'"></div><div class="sec">Payments</div>'
-  +(l.pays.length?"<table><tr><th>Date</th><th>Paid</th><th>Interest</th><th>Principal</th></tr>"+l.pays.slice(0,12).map(function(p){return"<tr><td>"+p.d+"</td><td>"+inr(p.a)+"</td><td>"+inr(p.i)+"</td><td>"+inr(p.p)+"</td></tr>"}).join("")+"</table>":'<div class="row">No payments recorded yet.</div>')
+  +'<div class="sec">Pay extra every month</div><div class="pay"><input id="x'+l.id+'" class="num" type="text" inputmode="decimal" autocomplete="off" placeholder="Extra ₹ per month" oninput="calc('+l.id+')"></div><div class="row" id="o'+l.id+'"></div><div class="sec">EMI history'+(l.pays.length?" ("+l.pays.length+")":"")+'</div>'
+  +(l.pays.length?"<table><tr><th>Date</th><th>Paid</th><th>Interest</th><th>Principal</th></tr>"+l.pays.slice(0,12).map(function(p){return"<tr><td>"+fdt(p.d)+"</td><td>"+inr(p.a)+"</td><td>"+inr(p.i)+"</td><td>"+inr(p.p)+"</td></tr>"}).join("")+"</table>"+'<div class="pay"><button data-l="'+l.id+'" onclick="payHist(this.dataset.l)">Full history &amp; totals</button></div>':'<div class="row">No payments recorded yet.</div>')
   +'</div></div>'});
  return h}
+var Q=[
+["Rich is a mindset before it is a bank balance.","","m"],
+["Wealth is not about having a lot of money; it's about having a lot of options.","Chris Rock","m"],
+["Formal education will make you a living; self-education will make you a fortune.","Jim Rohn","m"],
+["The best investment you can make is in yourself.","Warren Buffett","m"],
+["Today's discipline is tomorrow's freedom.","","m"],
+["Discipline is choosing between what you want now and what you want most.","","m"],
+["Think like an owner: own your time, your skills and your savings.","","m"],
+["Money is a good servant but a bad master.","","m"],
+["Wealth is built in the quiet months, when nobody is clapping.","","m"],
+["Your habits decide your wealth long before your salary does.","","m"],
+["Do not save what is left after spending; spend what is left after saving.","Warren Buffett","s"],
+["A small leak will sink a great ship.","Benjamin Franklin","s"],
+["It's not how much money you make, but how much money you keep.","Robert Kiyosaki","s"],
+["Pay yourself first. Every rupee you save starts working for you without asking for a salary.","","s"],
+["Track every rupee; you cannot grow what you do not measure.","","s"],
+["A budget tells your money where to go instead of wondering where it went.","","s"],
+["Buy assets first. Wants can wait for the surplus.","","s"],
+["Your savings rate says more about your future than your income does.","","s"],
+["Every small expense skipped today is a gift to your future self.","","s"],
+["The borrower is slave to the lender.","Proverbs 22:7","d"],
+["Pay the highest-interest debt first: it is the surest return you will ever earn.","","d"],
+["Debt is a tool in disciplined hands and a chain in careless ones.","","d"],
+["Every EMI you finish is a door closing behind you and freedom opening ahead.","","d"],
+["One extra payment today saves months of interest tomorrow.","","d"],
+["Do not let EMIs decide your future. Decide your future, then plan your EMIs.","","d"],
+["Borrow only for things that grow your income, not for things that fade.","","d"],
+["Being debt-free is not a number. It is waking up owing nothing.","","d"],
+["Be fearful when others are greedy, and greedy when others are fearful.","Warren Buffett","i"],
+["The stock market is a device for transferring money from the impatient to the patient.","Warren Buffett","i"],
+["The investor's chief problem, and even his worst enemy, is likely to be himself.","Benjamin Graham","i"],
+["The big money is not in the buying or the selling, but in the waiting.","Charlie Munger","i"],
+["Risk comes from not knowing what you are doing.","Warren Buffett","i"],
+["Someone is sitting in the shade today because someone planted a tree long ago.","Warren Buffett","i"],
+["Protect your capital first. Profits are what is left when you survive.","","i"],
+["A good trader is not the one who wins most trades, but the one who loses small and wins big.","","i"],
+["Plan the trade, then trade the plan.","","i"],
+["Compounding rewards patience far more than brilliance.","","i"],
+["Rule No. 1: never lose money. Rule No. 2: never forget Rule No. 1.","Warren Buffett","i"]];
+var QL=1;try{QL=(+localStorage.getItem("qload")||0)+1;localStorage.setItem("qload",QL)}catch(e){}
+(function(){var G={m:[["Treat your time as your first asset.","Learn something about money every single day.","Decide who you want to become before you decide what to buy.","Surround yourself with people who think bigger than you do.","Read more than you scroll.","Turn every setback into a lesson you will not pay for twice.","Build skills that pay you for decades.","Think in years, not in days.","Guard your focus like you guard your wallet.","Choose growth over comfort.","Own your mistakes and fix them fast.","Start before you feel ready.","Say no to what is urgent and yes to what is important.","Make your future self proud of today.","Be curious about how money really works.","Replace excuses with experiments.","Respect small wins; they compound.","Protect your energy as fiercely as your capital.","Judge yourself by your habits, not your mood.","Keep your goals visible and your distractions invisible."],["Rich is a way of thinking before it is a number.","Wealth is the quiet result of ordinary habits repeated for years.","Nobody gets rich by accident; they get rich by direction.","The market pays for value, patience and discipline.","Freedom is the real return on every rupee you manage well.","Consistency beats intensity every single time.","Your income grows when you grow.","Opportunity favours the prepared mind.","Money flows toward people who respect it.","The compounding of skills is as powerful as the compounding of money.","What you repeat, you become.","Small steps taken daily beat giant leaps taken rarely.","Success is a pile of boring days done well.","Generosity and wealth can grow in the same garden.","The best time to start was yesterday; the next best is now.","Patience is the price of every big result.","Clarity about your goal saves more money than any coupon.","Wealthy people buy time; others buy things.","Progress counts even when nobody is watching.","Your story is not finished until you stop writing it."]],s:[["Pay yourself first.","Track every rupee you spend.","Wait 48 hours before any purchase you did not plan.","Spend on what you value and cut the rest without guilt.","Automate your savings on salary day.","Keep an emergency fund before chasing returns.","Ask whether you are buying an asset or a feeling.","Review your expenses every week.","Cook at home more often than you order in.","Cancel subscriptions you forgot you had.","Set a monthly limit for wants and stick to it.","Save the raise before you get used to it.","Count the cost of a habit over ten years, not one day.","Carry less cash and more purpose.","Compare the price with the hours you worked to earn it.","Give every rupee a job before the month begins.","Keep needs, wants and savings in separate buckets.","Celebrate your savings rate, not your shopping bags.","Repair and reuse before you replace.","Turn small leaks into steady streams."],["A small leak can sink a great ship.","Your savings rate decides your freedom date.","Rich people stay rich by spending less than they earn.","Frugality is not poverty; it is power.","Cheap habits become expensive in the long run.","Wealth is what you keep, not what you earn.","A rupee saved today is a rupee that works tomorrow.","Budgeting is telling your money where to go.","Lifestyle creep quietly eats every raise.","Impulse is the enemy of compounding.","Every no to a want is a yes to a goal.","Comfort bought on credit is paid for twice.","What you save early grows the most.","Boring money habits build exciting futures.","Your wallet reflects your priorities.","Savings are the seeds of every future harvest.","Own your spending before it owns you.","Discipline in small purchases protects big dreams.","The cheapest time to start saving is now.","Financial peace is built one tracked rupee at a time."]],d:[["Pay the highest-interest debt first.","Never borrow for things that lose value.","Know the interest rate on every loan you hold.","Make one extra EMI payment whenever you can.","Keep your credit card balance at zero each month.","Write down every loan with its due date.","Use windfalls and bonuses to cut principal.","Avoid a new loan until the old one is cleared.","Read the fine print before you sign.","Treat each EMI as a promise to your future self.","Never pay a bill late; reminders are cheaper than penalties.","Compare the loan cost with the return you can actually earn.","Borrow only what you can repay comfortably.","Review your debt list every month.","Celebrate each loan you close.","Keep a small buffer so an EMI is never missed.","Say no to loans taken for show.","Refinance only when the numbers truly improve.","Clear the smallest balance first when you need motivation.","Teach your family what you learn about debt."],["Debt is a tool in disciplined hands and a chain in careless ones.","Every EMI cleared is freedom bought back.","Interest is a silent partner that never takes a holiday.","The borrower serves the lender until the last payment.","Being debt-free is the quiet kind of rich.","High-interest debt is the surest return you can erase.","What you owe is not who you are.","Today's discipline is the end of tomorrow's EMI.","A smaller loan sleeps better than a bigger one.","Freedom begins on the day the balance reaches zero.","Good debt builds assets; bad debt buys moments.","Your credit score is your financial reputation.","Paying early saves more than hoping for luck.","One decision at a time can end a decade of debt.","Debt grows in silence, so your plan must speak louder.","You cannot build wealth on a foundation leaking interest.","The goal is not to hide from debt but to outgrow it.","Fear of debt fades when you have a plan.","Every extra rupee on principal is a rupee returned to your future.","Owe less, own more."]],i:[["Protect your capital first.","Define your risk before you define your profit.","Plan the trade and trade the plan.","Keep a journal of every trade you take.","Never risk more than you can afford to lose on a single idea.","Wait for your setup instead of chasing the market.","Cut losses quickly and let winners run.","Diversify so one mistake cannot end your journey.","Invest regularly instead of trying to time every move.","Study the business before you buy the stock.","Think in probabilities, not predictions.","Control your emotions before you control your position size.","Review every loss as tuition, not as a verdict.","Keep learning from people who have survived many cycles.","Reinvest your gains and let compounding work.","Ignore the noise and follow your process.","Keep cash ready for the opportunities that appear in fear.","Measure success by consistency, not by one big win.","Respect the market; it humbles the careless.","Stay invested long enough for time to do the heavy lifting."],["The market rewards patience and punishes impatience.","Survival comes first; profits follow the survivors.","Compounding turns time into your strongest employee.","A good trader loses small and wins big.","Discipline is the edge that cannot be copied.","Risk comes from not knowing what you are doing.","Fear and greed are the market's oldest tricks.","Great investors are made by temperament, not by tips.","Every cycle ends; stay ready for the next one.","The big money is in the waiting.","Process produces profit; profit never produces process.","You do not need to win every trade to win the year.","Time in the market beats timing the market.","Rules protect you from your own emotions.","A calm mind is the best trading tool.","Knowledge compounds just like capital does.","The goal is to stay in the game long enough to win it.","Small edges, repeated often, build large fortunes.","Overconfidence is expensive; humility is profitable.","Wealth in markets is built slowly and lost quickly, so be slow."]]};for(var c in G)G[c][0].forEach(function(x){G[c][1].forEach(function(y){Q.push([x+" "+y,"",c])})})})();
+function gcd(a,b){return b?gcd(b,a%b):a}
+function qix(n,k){var m=101;while(gcd(m,n)!=1)m++;return(k*m)%n}
+function qpick(c){var L=Q.filter(function(q){return c.indexOf(q[2])>=0});return L[qix(L.length,Math.floor((QL-1)/5)+QI)]}
+function nq(){QI++;render()}
+var QO=0;try{QO=+localStorage.getItem("qopen")||0}catch(e){}
+function qt(){QO=QO?0:1;try{localStorage.setItem("qopen",QO)}catch(e){}render()}
+function qcard(c){var q=qpick(c);return'<div class="card qd'+(QO?" o":"")+'" style="border-left-color:var(--int)"><div class="qhd tap" onclick="qt()" role="button" aria-expanded="'+(QO?"true":"false")+'"><span>💡</span><div class="qpv">'+(QO?"Mindset of the day":"“"+esc(q[0])+"”")+'</div><span class="qch" style="transform:rotate('+(QO?180:0)+'deg)">▾</span></div>'+(QO?'<div class="qt" style="margin-top:8px">“'+esc(q[0])+'”</div>'+(q[1]?'<div class="qa">— '+esc(q[1])+'</div>':"")+'<div class="pay"><button onclick="nq()">Another ›</button></div>':"")+'</div>'}
+var QC="m",QP=0,QN=15,QNM={m:"Mindset",s:"Saving",d:"Debt",i:"Investing"};
+function qsC(c){QC=c;QP=0;render()}
+function qsP(d){QP=Math.max(0,QP+d);render()}
+function vQ(){var L=Q.filter(function(q){return q[2]==QC}),n=L.length,pg=Math.ceil(n/QN);if(QP>=pg)QP=pg-1;
+ var h='<div class="row" style="margin-top:0">'+Q.length+' quotes. A new one shows on Records, Accounts and Loans after every 5 app opens. Tap the bar there to expand it.</div><div class="chips">'+["m","s","d","i"].map(function(k){return'<button class="'+(QC==k?"on":"")+'" data-c="'+k+'" onclick="qsC(this.dataset.c)">'+QNM[k]+'</button>'}).join("")+'</div>';
+ for(var j=QP*QN;j<Math.min(n,QP*QN+QN);j++){var q=L[qix(n,j)];h+='<div class="card" style="border-left-color:var(--int)"><div class="qt">“'+esc(q[0])+'”</div>'+(q[1]?'<div class="qa">— '+esc(q[1])+'</div>':"")+'</div>'}
+ return h+'<div class="mn" style="margin-top:14px"><button onclick="qsP(-1)"'+(QP?"":" disabled")+'>‹ Prev</button><span>Page '+(QP+1)+' of '+pg+'</span><button onclick="qsP(1)"'+(QP<pg-1?"":" disabled")+'>Next ›</button></div>'}
 /* analysis */
 function buckets(g){var n={d:30,w:12,m:12,y:5}[g],t=new Date(),o=[];t.setHours(12,0,0,0);
  for(var i=n-1;i>=0;i--){
@@ -238,13 +321,15 @@ function svg(lb,ss,ty){
  var o='<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img"><defs><filter id="gl" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>'+ss.map(function(s,k){return'<linearGradient id="g'+k+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:'+s.c+'" stop-opacity=".35"/><stop offset="1" style="stop-color:'+s.c+'" stop-opacity="0"/></linearGradient>'}).join("")+'</defs>';
  [0,.25,.5,.75,1].forEach(function(f){var v=lo+(hi-lo)*f,y=Y(v);o+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" style="stroke:var(--line)"/><text x="'+(L-4)+'" y="'+(y+4)+'" text-anchor="end" font-size="10" style="fill:var(--mute)">'+sh(v)+'</text>'});
  var st=Math.ceil(n/6);lb.forEach(function(l,i){if(i%st==0){var x=ty=="bar"?L+iw*(i+.5)/n:X(i);o+='<text x="'+x+'" y="'+(H-6)+'" text-anchor="middle" font-size="10" style="fill:var(--mute)">'+l+'</text>'}});
+ var ti=(TI>=0&&TI<n)?TI:n-1;
+ if(ti<n-1){var tx=ty=="bar"?L+iw*(ti+1)/n:X(ti);o+='<rect x="'+tx+'" y="'+T+'" width="'+(W-R-tx)+'" height="'+ih+'" style="fill:var(--chip);opacity:.45"/><line x1="'+tx+'" x2="'+tx+'" y1="'+T+'" y2="'+(T+ih)+'" style="stroke:var(--acc);stroke-dasharray:4 3"/><text x="'+(W-R-4)+'" y="'+(T+11)+'" text-anchor="end" font-size="10" style="fill:var(--mute)">Future</text>'}
  ss.forEach(function(s,k){
   if(ty=="bar"){var bw=iw/n/(ss.length+.5);s.v.forEach(function(v,i){var x=L+iw*i/n+(iw/n-ss.length*bw)/2+k*bw,y=Y(v),y0=Y(0);o+='<rect x="'+x+'" y="'+Math.min(y,y0)+'" width="'+bw*.9+'" height="'+Math.max(1,Math.abs(y0-y))+'" rx="2" style="fill:'+s.c+'"/>'})}
   else{var pts=s.v.map(function(v,i){return X(i)+","+Y(v)}).join(" ");
    if(ty!="bar")o+='<polygon points="'+X(0)+","+(T+ih)+" "+pts+" "+X(n-1)+","+(T+ih)+'" style="fill:url(#g'+k+')"/>';
    o+='<polyline points="'+pts+'" fill="none" stroke-width="2.5" stroke-linejoin="round" filter="url(#gl)" style="stroke:'+s.c+'"/>';
-   o+='<circle cx="'+X(n-1)+'" cy="'+Y(s.v[n-1])+'" r="5" filter="url(#gl)" style="fill:'+s.c+'"/>'}});
- o+='<line id="cl" y1="'+T+'" y2="'+(T+ih)+'" visibility="hidden" style="stroke:var(--mute);stroke-dasharray:3 3"/>';ss.forEach(function(s,k){o+='<circle id="cd'+k+'" r="5" visibility="hidden" style="fill:'+s.c+';stroke:var(--card);stroke-width:2"/>'});LC={lb:lb,ss:ss,ty:ty,n:n,L:L,iw:iw,W:W,T:T,ih:ih,lo:lo,hi:hi};return o+"</svg>"}
+   o+='<circle cx="'+X(ti)+'" cy="'+Y(s.v[ti])+'" r="5" filter="url(#gl)" style="fill:'+s.c+'"/>'}});
+ o+='<line id="cl" y1="'+T+'" y2="'+(T+ih)+'" visibility="hidden" style="stroke:var(--mute);stroke-dasharray:3 3"/>';ss.forEach(function(s,k){o+='<circle id="cd'+k+'" r="5" visibility="hidden" style="fill:'+s.c+';stroke:var(--card);stroke-width:2"/>'});LC={lb:lb,ss:ss,ty:ty,n:n,L:L,iw:iw,W:W,T:T,ih:ih,lo:lo,hi:hi,ti:ti};return o+"</svg>"}
 var CI={Food:"🍔",Snacks:"🍿",Cigarette:"🚬",Transport:"🚗",Bills:"🧾",Shopping:"🛍️",Entertainment:"🎬",Health:"💊","Loan EMI":"🏦",Other:"📦",Salary:"💼",Trading:"📈",Transfer:"🔁"};
 function ico(n){var c=D.cat.e.concat(D.cat.i).find(function(x){return x.n==n&&x.ic});return c?c.ic:CI[n]||"🏷️"}
 function aico(n){var s=n.toLowerCase();return s.indexOf("cash")>=0?"💵":s.indexOf("wallet")>=0?"👛":s.indexOf("sav")>=0?"🐷":(s.indexOf("pay")>=0||s.indexOf("upi")>=0)?"📱":s.indexOf("card")>=0?"💳":s.indexOf("emerg")>=0?"🛟":"🏦"}
@@ -306,7 +391,7 @@ function bindChart(root){var c=root.querySelector("#cht"),s=c&&c.querySelector("
   d.ss.forEach(function(q,k){var dot=c.querySelector("#cd"+k);dot.setAttribute("cx",x);dot.setAttribute("cy",d.T+d.ih*(1-(q.v[i]-d.lo)/(d.hi-d.lo)));dot.setAttribute("visibility",d.ty=="bar"?"hidden":"visible");h+='<div><i style="background:'+q.c+'"></i>'+q.n+" "+(q.n=="Count"?q.v[i]:inr(q.v[i]))+"</div>"});
   tip.innerHTML=h;tip.style.display="block";tip.style.left=(sr.left-cr.left+Math.max(0,Math.min(sw-130,x/d.W*sw-60)))+"px";tip.style.top=(sr.top-cr.top+4)+"px"}
  function mv(e){var r=s.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*d.W,i=d.ty=="bar"?Math.floor((x-d.L)/d.iw*d.n):Math.round((x-d.L)/d.iw*(d.n>1?d.n-1:1));show(Math.max(0,Math.min(d.n-1,i)))}
- s.style.touchAction="pan-y";s.addEventListener("pointerdown",mv);s.addEventListener("pointermove",mv);show(d.n-1)}
+ s.style.touchAction="pan-y";s.addEventListener("pointerdown",mv);s.addEventListener("pointermove",mv);show(d.ti==null?d.n-1:d.ti)}
 var EMO=["🍔","🍕","☕","🍿","🚬","🍺","🚗","⛽","🏠","💡","📱","🛍️","👕","🎬","🎮","✈️","💊","📚","🎁","💼","📈","💰","🏦","🧾","🐶","💇","🏋️","🔧","📦"];
 function pe(e){$("ei").value=e}
 function catEdit(t,i){var c=D.cat[t][+i];sheet('<h1>Edit category</h1><label>Name</label><input id="en" value="'+esc(c.n)+'"'+(c.n=="Loan EMI"?" readonly":"")+'><label>Icon (type or tap an emoji)</label><input id="ei" maxlength="4" value="'+esc(ico(c.n))+'"><div class="chips">'+EMO.map(function(e){return'<button data-e="'+e+'" onclick="pe(this.dataset.e)">'+e+'</button>'}).join("")+'</div>'+(t=="e"?'<label><input type="checkbox" id="el"'+(c.l?" checked":"")+'> Leisure spending</label>':"")+'<div class="pay"><button class="p" data-t="'+t+'" data-i="'+i+'" onclick="catSave(this.dataset.t,this.dataset.i)">Save</button><button onclick="shut()">Cancel</button></div>')}
@@ -346,8 +431,13 @@ function recForm(eid){var E=eid?D.rec.find(function(x){return x.id==eid}):null;i
  sheet('<div class="tb"><button onclick="shut()">✕ Cancel</button><button class="p" onclick="addRec('+(eid||0)+')">✓ '+(E?"Update":"Save")+'</button></div><div class="seg" id="sg"><button data-t="i" onclick="setT(this.dataset.t)">Income</button><button data-t="e" onclick="setT(this.dataset.t)">Expense</button><button data-t="t" onclick="setT(this.dataset.t)">Transfer</button></div><div class="g" style="margin-top:8px"><select id="rc" class="sel" aria-label="Account">'+opts(D.acc)+'</select><div><select id="rk" class="sel" aria-label="Category" style="width:100%"></select><select id="rd" class="sel" aria-label="To account" style="display:none;width:100%">'+opts(D.acc)+'</select></div></div><input id="rn" placeholder="Add notes" style="margin-top:8px"><div class="pay" style="margin-top:8px"><input id="ra" readonly inputmode="none" value="0" style="font-size:30px;text-align:right" aria-label="Amount"><button class="bsb" onpointerdown="bsd()" onpointerup="bsu()" onpointerleave="bsu()" onpointercancel="bsu()" oncontextmenu="return false" aria-label="Delete, hold to clear">⌫</button></div><div id="ex" class="ex"></div>'+kpad()+'<div class="g" style="margin-top:8px"><input id="rx" type="date" value="'+today()+'" aria-label="Date"><input id="rm" type="time" value="'+tm+'" aria-label="Time"></div>');
  $("shb").className="full";setT(rt);
  if(!E&&D.last&&acc(D.last.acc))$("rc").value=D.last.acc;
- if(E){$("ra").value=E.amt;$("rc").value=E.acc;if(E.t=="t")$("rd").value=E.to;else $("rk").value=E.cat;$("rn").value=E.note;$("rx").value=E.date;$("rm").value=E.time||tm}}
+ if(E){setA(""+E.amt);$("rc").value=E.acc;if(E.t=="t")$("rd").value=E.to;else $("rk").value=E.cat;$("rn").value=E.note;$("rx").value=E.date;$("rm").value=E.time||tm}}
 function setT(t){rt=t;var b=$("sg").children;for(var i=0;i<3;i++)b[i].className=b[i].dataset.t==t?"on":"";$("rd").style.display=t=="t"?"block":"none";$("rk").style.display=t=="t"?"none":"block";if(t!="t"){$("rk").innerHTML=copts(t);if(D.last&&D.last[t])$("rk").value=D.last[t]}else if($("rd").value==$("rc").value&&$("rd").options.length>1)$("rd").selectedIndex=($("rc").selectedIndex+1)%$("rd").options.length}
+function aheadEnd(td){var a=V.ah||"A",mx=td;
+ if(a=="0")return td;
+ if(a=="A"){var l=new Date(td+"T12:00");l.setFullYear(l.getFullYear()+5);var lim=dstr(l);D.rec.forEach(function(r){if(r.date>mx&&r.date<=lim)mx=r.date});return mx}
+ var d=new Date(td+"T12:00");d.setMonth(d.getMonth()+(+a));return dstr(d)}
+function aheadUI(){if(V.r=="1D"||V.r=="C")return"";return'<div class="row" style="margin:0 0 2px"><span>Include future entries</span></div>'+chips("ah",[["A","Auto"],["0","Off"],["1","+1M"],["3","+3M"],["6","+6M"],["12","+1Y"]])}
 function buckets2(){var R=V.r,t=new Date(),o=[],i,d,s0,e0,end;t.setHours(12,0,0,0);e0=dstr(t);
  function add(s,e,l){o.push({l:l,s:s,e:e})}
  if(R=="1D"){for(i=0;i<24;i++){var hh=p2(i);add(e0+" "+hh+":00",e0+" "+hh+":59",hh+"h")}o.gn="hour";return o}
@@ -355,6 +445,7 @@ function buckets2(){var R=V.r,t=new Date(),o=[],i,d,s0,e0,end;t.setHours(12,0,0,
  if(R=="C"){s0=V.f||e0;e0=V.t||e0;if(s0>e0){var x=s0;s0=e0;e0=x}}
  else if(R=="X"){s0=D.rec.reduce(function(m,r){return r.date<m?r.date:m},e0)}
  else{var a=new Date(t);a.setDate(a.getDate()-days[R]+1);s0=dstr(a)}
+ if(R!="C"){var fe=aheadEnd(e0);if(fe>e0)e0=fe}
  var span=Math.round((new Date(e0+"T12:00")-new Date(s0+"T12:00"))/864e5)+1;end=new Date(e0+"T12:00");
  if(span<=45){d=new Date(s0+"T12:00");for(i=0;i<span;i++){var ds=dstr(d);add(ds+" 00:00",ds+" 23:59",ds.slice(5));d.setDate(d.getDate()+1)}o.gn="day"}
  else if(span<=200){d=new Date(s0+"T12:00");while(d<=end){var w=new Date(d);w.setDate(w.getDate()+6);if(w>end)w=new Date(end);add(dstr(d)+" 00:00",dstr(w)+" 23:59",dstr(d).slice(5));d.setDate(d.getDate()+7)}o.gn="week"}
@@ -365,8 +456,8 @@ function rchips(){var r=[["1D","1D"],["3D","3D"],["1W","1W"],["1M","1M"],["3M","
 function chips(k,items){return'<div class="chips">'+items.map(function(i){return'<button class="'+(V[k]==i[0]?"on":"")+'" onclick="sv(\''+k+'\',\''+i[0]+'\')">'+i[1]+"</button>"}).join("")+"</div>"}
 function sv(k,v){V[k]=v;render()}
 function vAn(){
- var B=buckets2(),lb=B.map(function(b){return b.l}),gn=B.gn,S0=B[0].s.slice(0,10),E0=B[B.length-1].e.slice(0,10);AR=[S0,E0];
- var h=rchips()+kpis(S0,E0)+chips("v",[["nw","Net worth"],["ie","Income vs expense"],["cat","Category trend"],["split","Where money goes"],["hist","Spend sizes"]]);
+ var B=buckets2(),lb=B.map(function(b){return b.l}),gn=B.gn,S0=B[0].s.slice(0,10),E0=B[B.length-1].e.slice(0,10);AR=[S0,E0];var td=today(),tix=-1;B.forEach(function(b,i){if(tix<0&&b.s.slice(0,10)<=td&&b.e.slice(0,10)>=td)tix=i});TI=(V.r=="1D"||V.v=="hist")?-1:tix;var fut=TI>=0&&TI<B.length-1?" Includes entries scheduled in the future.":"";
+ var h=rchips()+aheadUI()+kpis(S0,E0)+chips("v",[["nw","Net worth"],["ie","Income vs expense"],["cat","Category trend"],["split","Where money goes"],["hist","Spend sizes"]]);
  if(V.v!="split"&&V.v!="hist")h+=chips("ty",[["line","Line"],["bar","Bar"]]);
  h+='<div class="row" style="margin:2px 0 8px">'+{nw:"Your net worth (accounts minus loans) and what you owe, over time.",ie:"Money in versus money out for each period.",cat:"One category, or all income or expenses, over time. Pick one below.",split:"Tap a category to see its transactions.",hist:"How many of your expenses fall in each size range."}[V.v]+"</div>";
  if(V.v=="cat")h+='<select onchange="sv(\'cat\',this.value)"><option value="__e"'+(V.cat=="__e"?" selected":"")+'>All expenses</option><option value="__i"'+(V.cat=="__i"?" selected":"")+'>All income</option>'+D.cat.e.concat(D.cat.i).map(function(c){return'<option'+(V.cat==c.n?" selected":"")+'>'+esc(c.n)+"</option>"}).join("")+"</select>";
@@ -376,13 +467,13 @@ function vAn(){
   var nv=B.map(function(b){return nwAt(b.e)-liAt(b.e)}),lv=B.map(function(b){return liAt(b.e)});
   c=svg(lb,[{n:"Net worth",c:"var(--acc)",v:nv},{n:"Liabilities",c:"var(--debt)",v:lv}],V.ty);
   c+='<div class="leg"><span><i style="background:var(--acc)"></i>Net worth</span><span><i style="background:var(--debt)"></i>Liabilities</span></div>';
-  ins="Over these "+B.length+" "+gn+"s your net worth changed by "+inr(nv[nv.length-1]-nv[0])+" and liabilities moved by "+inr(lv[lv.length-1]-lv[0])+"."}
- else if(V.v=="ie"){var iv=B.map(function(b){return sumR(function(r){return r.t=="i"},b.s,b.e)}),xv=B.map(function(b){return sumR(function(r){return r.t=="e"},b.s,b.e)}),ti2=iv.reduce(function(a,b){return a+b},0),te2=xv.reduce(function(a,b){return a+b},0);c=svg(lb,[{n:"Income",c:"var(--good)",v:iv},{n:"Expense",c:"var(--debt)",v:xv}],V.ty)+'<div class="leg"><span><i style="background:var(--good)"></i>Income</span><span><i style="background:var(--debt)"></i>Expense</span></div>';ins="In this period you earned "+inr(ti2)+" and spent "+inr(te2)+(ti2>=te2?", saving ":", overspending by ")+inr(Math.abs(ti2-te2))+"."}
+  var tj=TI>=0?TI:nv.length-1;ins="Up to today your net worth changed by "+inr(nv[tj]-nv[0])+" and liabilities moved by "+inr(lv[tj]-lv[0])+"."+(tj<nv.length-1?" With your future entries net worth reaches "+inr(nv[nv.length-1])+" by "+lb[lb.length-1]+".":"")}
+ else if(V.v=="ie"){var iv=B.map(function(b){return sumR(function(r){return r.t=="i"},b.s,b.e)}),xv=B.map(function(b){return sumR(function(r){return r.t=="e"},b.s,b.e)}),ti2=iv.reduce(function(a,b){return a+b},0),te2=xv.reduce(function(a,b){return a+b},0);c=svg(lb,[{n:"Income",c:"var(--good)",v:iv},{n:"Expense",c:"var(--debt)",v:xv}],V.ty)+'<div class="leg"><span><i style="background:var(--good)"></i>Income</span><span><i style="background:var(--debt)"></i>Expense</span></div>';ins="In this period you earned "+inr(ti2)+" and spent "+inr(te2)+(ti2>=te2?", saving ":", overspending by ")+inr(Math.abs(ti2-te2))+"."+fut}
  else if(V.v=="cat"){
   var f=V.cat=="__e"?function(r){return r.t=="e"}:V.cat=="__i"?function(r){return r.t=="i"}:function(r){return r.t!="t"&&r.cat==V.cat},col=V.cat=="__i"?"var(--good)":"var(--int)";
   var cv=B.map(function(b){return sumR(f,b.s,b.e)}),tot=cv.reduce(function(a,b){return a+b},0),pk=cv.indexOf(Math.max.apply(null,cv));
   c=svg(lb,[{n:"Amount",c:col,v:cv}],V.ty);
-  ins="Total "+inr(tot)+", average "+inr(tot/B.length)+" per "+gn+". Highest "+gn+": "+B[pk].l+" ("+inr(cv[pk])+")."}
+  ins="Total "+inr(tot)+", average "+inr(tot/B.length)+" per "+gn+". Highest "+gn+": "+B[pk].l+" ("+inr(cv[pk])+")."+fut}
  else if(V.v=="split"){
   var m={},tot2=0,lt=0;D.rec.forEach(function(r){if(r.t=="e"&&r.date>=S0&&r.date<=E0){m[r.cat]=(m[r.cat]||0)+r.amt;tot2+=r.amt;if(isL(r.cat))lt+=r.amt}});
   var ks=Object.keys(m).sort(function(a,b){return m[b]-m[a]});
@@ -425,7 +516,7 @@ function render(){
  ["r","a","l","z"].forEach(function(t){$("n-"+t).className=(t==tab||t=="r"&&(tab=="k"||tab=="d"&&!BD.r)||t=="z"&&tab=="d"&&BD.r||t=="a"&&tab=="h")?"on":""});
  $("ttl").textContent=TT[tab];$("fab").style.display="ra l".indexOf(tab)>=0&&!sm?"block":"none";
  $("thb").textContent=curTh()=="dark"?"Switch to day mode":"Switch to night mode";
- SH=FS?fsH():190;var vh={r:vRec,k:vCal,d:vBD,h:vHist,a:vAcc,l:vLoan,z:vAn,b:vBal,c:vCat,x:vX}[tab]();if(FS&&tab=="z"){$("m").innerHTML="";$("fs").innerHTML='<div class="tb"><b>Analysis</b><button onclick="fsClose()">✕ Close</button></div>'+vh}else $("m").innerHTML=vh;if(tab=="z")bindChart(FS?$("fs"):$("m"));
+ SH=FS?fsH():190;var vh={r:vRec,k:vCal,d:vBD,h:vHist,a:vAcc,l:vLoan,z:vAn,b:vBal,c:vCat,x:vX,q:vQ}[tab]();if(FS&&tab=="z"){$("m").innerHTML="";$("fs").innerHTML='<div class="tb"><b>Analysis</b><button onclick="fsClose()">✕ Close</button></div>'+vh}else $("m").innerHTML=vh;if(tab=="z")bindChart(FS?$("fs"):$("m"));
  if(tab=="l"&&open&&$("x"+open))calc(open)}
 render();
 if("serviceWorker"in navigator&&/^https?:/.test(location.protocol)){navigator.serviceWorker.register("sw.js").catch(function(){})}
