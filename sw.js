@@ -1,4 +1,4 @@
-const V='mcc-v12',FILES=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png'];
+const V='mcc-v13',FILES=['./','index.html','manifest.webmanifest','icon-192.png','icon-512.png'];
 const fresh=u=>fetch(new Request(u,{cache:'reload'}));
 self.addEventListener('install',e=>{e.waitUntil(caches.open(V).then(c=>Promise.all(FILES.map(f=>fresh(f).then(r=>{if(!r.ok)throw new Error(f);return c.put(f,r)})))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
